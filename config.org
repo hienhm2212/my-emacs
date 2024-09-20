@@ -17,6 +17,7 @@
   - [[#good-defaults][Good Defaults]]
   - [[#better-defaults][Better Defaults]]
   - [[#amx][Amx]]
+  - [[#personal-information][Personal Information]]
 - [[#appearance][Appearance]]
   - [[#set-theme][Set Theme]]
   - [[#transparency][Transparency]]
@@ -31,6 +32,7 @@
   - [[#terminal][Terminal]]
   - [[#deadgrep][Deadgrep]]
   - [[#github-copilot][Github Copilot]]
+  - [[#gptel][Gptel]]
 - [[#multi-file-example][Multi File Example]]
   - [[#adding-the-lisp-directory-to-load-path][Adding the lisp directory to load-path]]
   - [[#sourcing-the-files][Sourcing the files]]
@@ -134,7 +136,8 @@ Notes:
 If you don't want to use evil-mode don't forget to remove:
 - Messages buffer fix in Good default section (:ghook)
 - And also change general.el keybindings and setup (general-evil-setup, :states, etc.)
-#+begin_src emacs-lisp
+*Note* I don't use evil mode 
+#+begin_src emacs-lisp :tangle no
     (use-package evil
       :init ;; Execute code Before a package is loaded
       (evil-mode)
@@ -164,122 +167,128 @@ A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
 #+begin_src emacs-lisp
-    (use-package general
-      :config
-      (general-evil-setup)
-      ;; Set up 'SPC' as the leader key
-      (general-create-definer start/leader-keys
-        :states '(normal insert visual motion emacs)
-        :keymaps 'override
-        :prefix "SPC"           ;; Set leader key
-        :global-prefix "C-SPC") ;; Set global leader key
+  (use-package general
+:init 
+(general-auto-unbind-keys)
+    :config
+    ;; (general-evil-setup)
+    ;; Set up 'C-c' as the leader key
+    (general-create-definer start/leader-keys
+      :prefix "C-c")           ;; Set leader key
 
-      (start/leader-keys
-        "." '(find-file :wk "Find file")
-        "TAB" '(comment-line :wk "Comment lines")
-        "p" '(projectile-command-map :wk "Projectile command map"))
+    (start/leader-keys
+      "." '(find-file :wk "Find file")
+      "TAB" '(comment-line :wk "Comment lines")
+      "p" '(projectile-command-map :wk "Projectile command map"))
 
-      (start/leader-keys
-        "f" '(:ignore t :wk "Find")
-        "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-        "f r" '(consult-recent-file :wk "Recent files")
-        "f f" '(consult-fd :wk "Fd search for files")
-        "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-        "f l" '(consult-line :wk "Find line")
-        "f i" '(consult-imenu :wk "Imenu buffer locations"))
+    (start/leader-keys
+      "f" '(:ignore t :wk "Find")
+      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+      "f r" '(consult-recent-file :wk "Recent files")
+      "f f" '(consult-fd :wk "Fd search for files")
+      "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+      "f l" '(consult-line :wk "Find line")
+      "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-      (start/leader-keys
-        "b" '(:ignore t :wk "Buffer Bookmarks")
-        "b b" '(consult-buffer :wk "Switch buffer")
-        "b k" '(kill-this-buffer :wk "Kill this buffer")
-        "b i" '(ibuffer :wk "Ibuffer")
-        "b n" '(next-buffer :wk "Next buffer")
-        "b p" '(previous-buffer :wk "Previous buffer")
-        "b r" '(revert-buffer :wk "Reload buffer")
-        "b j" '(consult-bookmark :wk "Bookmark jump"))
+    (start/leader-keys
+      "b" '(:ignore t :wk "Buffer Bookmarks")
+      "b b" '(consult-buffer :wk "Switch buffer")
+      "b k" '(kill-this-buffer :wk "Kill this buffer")
+      "b i" '(ibuffer :wk "Ibuffer")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-      (start/leader-keys
-        "d" '(:ignore t :wk "Dired")
-        "d v" '(dired :wk "Open dired")
-        "d j" '(dired-jump :wk "Dired jump to current"))
+    (start/leader-keys
+      "c" '(:ignore t :wk "ChatGPT")
+      "c c" '(gptel :wk "Start")
+      "c s" '(gptel-send :wk "Send")
+      "c m" '(gptel-menu :wk "Menu"))
 
-      (start/leader-keys
-        "e" '(:ignore t :wk "Eglot Evaluate")
-        "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-        "e f" '(eglot-format :wk "Eglot Format")
-        "e l" '(consult-flymake :wk "Consult Flymake")
-        "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-        "e r" '(eval-region :wk "Evaluate elisp in region"))
+    (start/leader-keys
+      "d" '(:ignore t :wk "Dired")
+      "d v" '(dired :wk "Open dired")
+      "d j" '(dired-jump :wk "Dired jump to current"))
 
-      (start/leader-keys
-        "g" '(:ignore t :wk "Git")
-        "g g" '(magit-status :wk "Magit status"))
+    (start/leader-keys
+      "e" '(:ignore t :wk "Eglot Evaluate")
+      "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+      "e f" '(eglot-format :wk "Eglot Format")
+      "e l" '(consult-flymake :wk "Consult Flymake")
+      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+      "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-      (start/leader-keys
-        "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-        "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-        "h r" '((lambda () (interactive)
-                  (load-file "~/.config/emacs/init.el"))
-                :wk "Reload Emacs config"))
+    (start/leader-keys
+      "g" '(:ignore t :wk "Git")
+      "g g" '(magit-status :wk "Magit status"))
 
-      (start/leader-keys
-        "s" '(:ignore t :wk "Show")
-        "s e" '(eat :wk "Eat terminal"))
+    (start/leader-keys
+      "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+      "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+      "h r" '((lambda () (interactive)
+                (load-file "~/.config/emacs/init.el"))
+              :wk "Reload Emacs config"))
 
-      (start/leader-keys
-        "t" '(:ignore t :wk "Toggle")
-        "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-        "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+    (start/leader-keys
+      "s" '(:ignore t :wk "Show")
+      "s e" '(eat :wk "Eat terminal"))
+
+    (start/leader-keys
+      "t" '(:ignore t :wk "Toggle")
+      "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 #+end_src
 
 ** Good Defaults
 #+begin_src emacs-lisp
-    (use-package emacs
-      :custom
-      (menu-bar-mode nil)         ;; Disable the menu bar
-      (scroll-bar-mode nil)       ;; Disable the scroll bar
-      (tool-bar-mode nil)         ;; Disable the tool bar
-      (inhibit-startup-screen t)  ;; Disable welcome screen
+  (use-package emacs
+    :custom
+    (menu-bar-mode nil)         ;; Disable the menu bar
+    (scroll-bar-mode nil)       ;; Disable the scroll bar
+    (tool-bar-mode nil)         ;; Disable the tool bar
+    (inhibit-startup-screen t)  ;; Disable welcome screen
 
-      (delete-selection-mode t)   ;; Select text and delete it by typing.
-      (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
-      (electric-pair-mode t)      ;; Turns on automatic parens pairing
+    (delete-selection-mode t)   ;; Select text and delete it by typing.
+    (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+    (electric-pair-mode t)      ;; Turns on automatic parens pairing
 
-      (blink-cursor-mode nil)     ;; Don't blink cursor
-      (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
+    (blink-cursor-mode nil)     ;; Don't blink cursor
+    (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
 
-      ;;(dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
-      (recentf-mode t) ;; Enable recent file mode
+    ;;(dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
+    (recentf-mode t) ;; Enable recent file mode
 
-      ;;(global-visual-line-mode t)           ;; Enable truncated lines
-      (display-line-numbers-type 'relative) ;; Relative line numbers
-      (global-display-line-numbers-mode t)  ;; Display line numbers
+    ;;(global-visual-line-mode t)           ;; Enable truncated lines
+    ;; (display-line-numbers-type 'relative) ;; Relative line numbers
+    (global-display-line-numbers-mode t)  ;; Display line numbers
 
-      (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
-      (scroll-conservatively 10) ;; Smooth scrolling
-      ;;(scroll-margin 8)
+    (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
+    (scroll-conservatively 10) ;; Smooth scrolling
+    ;;(scroll-margin 8)
 
-      (tab-width 4)
+    (tab-width 4)
 
-      (make-backup-files nil) ;; Stop creating ~ backup files
-      (auto-save-default nil) ;; Stop creating # auto save files
-      :hook
-      (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
-      :config
-      ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
-      (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-      (load custom-file 'noerror 'nomessage)
-      :bind (
-             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-             )
-      ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-      :ghook ('after-init-hook
-              (lambda (&rest _)
-                (when-let ((messages-buffer (get-buffer "*Messages*")))
-                  (with-current-buffer messages-buffer
-                    (evil-normalize-keymaps))))
-              nil nil t)
-      )
+    (make-backup-files nil) ;; Stop creating ~ backup files
+    (auto-save-default nil) ;; Stop creating # auto save files
+    (visible-bell t) ;; Turn off audible bell
+    :hook
+    (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
+    :config
+    ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
+    (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+    (load custom-file 'noerror 'nomessage)
+    :bind (
+           ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+           )
+    ;; Fix general.el leader key not working instantly in messages buffer with evil mode
+    ;; :ghook ('after-init-hook
+    ;;         (lambda (&rest _)
+    ;;           (when-let ((messages-buffer (get-buffer "*Messages*")))
+    ;;             (with-current-buffer messages-buffer
+    ;;               (evil-normalize-keymaps))))
+    ;;         nil nil t)
+    )
 #+end_src
 
 ** Better Defaults
@@ -293,6 +302,11 @@ It provides several enhancement over the ordinary ~execute-extended-command~
       :ensure t
       :config
       (amx-mode 1))
+#+end_src
+** Personal Information
+#+begin_src emacs-lisp
+  (setq user-full-name "Hien Huynh-Minh"
+        user-mail-address "blackcat22121996@gmail.com")
 #+end_src
 * Appearance
 ** Set Theme
@@ -531,6 +545,46 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
     ;;   :ensure t)
     ;; you can utilize :map :hook and :config to customize copilot
 #+end_src
+** Gptel
+#+begin_src emacs-lisp
+  (defun me/read-openai-key ()
+    (with-temp-buffer
+      (insert-file-contents "./key.txt")
+      (string-trim (buffer-string))))
+
+  (use-package gptel
+    :config
+    (setq gptel-playback t)
+    (setq gptel-api-key #'me/read-openai-key)
+    (setq gptel-default-mode 'org-mode)
+    (setq gptel-model "gpt-4o-mini"))
+#+end_src
+*** Custome function call gptel
+#+begin_src emacs-lisp
+(defun ad/ai-from-anywhere ()
+(interactive)
+(let* ((screen-width (display-pixel-width))
+       (screen-height (display-pixel-height))
+       (frame-width (/ screen-width 3))
+       (frame-height screen-height)
+       (frame-left (- screen-width frame-width))
+       (frame-top 0)
+       (chat-frame (make-frame `((window-system . ns)  ;;change this if you are not on macOS. For example you can use "x" instead of "ns" for x systems. Refer to make-frame documentation for more details
+                            (top . ,frame-top)
+                            (left . ,frame-left)
+                            (width . (text-pixels . ,frame-width))
+                            (heigth . (text-pixels . ,frame-height))
+                            (minibuffer . t)
+                            ))))
+  (select-frame chat-frame)
+  )
+  (add-hook 'gptel-post-response-hook (lambda () (goto-char (point-max))))
+  (gptel "My:AI Chat" gptel-api-key nil)
+  (switch-to-buffer "My:AI Chat")
+  (delete-other-windows)
+)
+
+#+end_src
 * Multi File Example
 ** Adding the lisp directory to load-path
 Adds the lisp directory to emacs's load path to search for elisp files.
@@ -594,6 +648,19 @@ Highlights uncommitted changes on the left side of the window (area also known a
       :init (global-diff-hl-mode))
 #+end_src
 
+*** Magit Todos
+First, setup ~hl-todo~.
+#+begin_src emacs-lisp
+(use-package hl-todo
+:defer t
+:config (global-hl-todo-mode 1))
+#+end_src
+This package displays keyword entries from source code comments and Org files in the Magit status buffer.
+#+begin_src emacs-lisp
+    (use-package magit-todos
+      :after (magit)
+      :config (magit-todos-mode 1))
+#+end_src
 ** Corfu
 Enhances in-buffer completion with a small completion popup.
 Corfu is a small package, which relies on the Emacs completion facilities and concentrates on providing a polished completion.
@@ -706,80 +773,80 @@ One alternative is ivy and counsel, check out the [[https://github.com/MiniApoll
 Provides search and navigation commands based on the Emacs completion function.
 Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
 #+begin_src emacs-lisp
-    (use-package consult
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
-      :init
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+  (use-package consult
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+    :init
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
 
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
-      :config
-      ;; Optionally configure preview. The default value
-      ;; is 'any, such that any key triggers the preview.
-      ;; (setq consult-preview-key 'any)
-      ;; (setq consult-preview-key "M-.")
-      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
+    :config
+    ;; Optionally configure preview. The default value
+    ;; is 'any, such that any key triggers the preview.
+    ;; (setq consult-preview-key 'any)
+    ;; (setq consult-preview-key "M-.")
+    ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
 
-      ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the `consult-customize' macro.
-      ;; (consult-customize
-      ;; consult-theme :preview-key '(:debounce 0.2 any)
-      ;; consult-ripgrep consult-git-grep consult-grep
-      ;; consult-bookmark consult-recent-file consult-xref
-      ;; consult--source-bookmark consult--source-file-register
-      ;; consult--source-recent-file consult--source-project-recent-file
-      ;; :preview-key "M-."
-      ;; :preview-key '(:debounce 0.4 any))
+    ;; For some commands and buffer sources it is useful to configure the
+    ;; :preview-key on a per-command basis using the `consult-customize' macro.
+    ;; (consult-customize
+    ;; consult-theme :preview-key '(:debounce 0.2 any)
+    ;; consult-ripgrep consult-git-grep consult-grep
+    ;; consult-bookmark consult-recent-file consult-xref
+    ;; consult--source-bookmark consult--source-file-register
+    ;; consult--source-recent-file consult--source-project-recent-file
+    ;; :preview-key "M-."
+    ;; :preview-key '(:debounce 0.4 any))
 
-      ;; By default `consult-project-function' uses `project-root' from project.el.
-      ;; Optionally configure a different project root function.
-               ;;;; 1. project.el (the default)
-      ;; (setq consult-project-function #'consult--default-project--function)
-               ;;;; 2. vc.el (vc-root-dir)
-      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-               ;;;; 3. locate-dominating-file
-      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-               ;;;; 4. projectile.el (projectile-project-root)
-      (autoload 'projectile-project-root "projectile")
-      (setq consult-project-function (lambda (_) (projectile-project-root)))
-               ;;;; 5. No project support
-      ;; (setq consult-project-function nil)
-      :bind (
-             ("C-c M-x" . consult-mode-command)
-             ;; C-x bindings (ctrl-x-map)
-             ("C-x M-:" . consult-complex-command)
-             ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
-             ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
-             ("M-y" . consult-yank-pop) ;; orig. yank-pop
-             ;; M-g bindings (goto-map)
-             ("M-g e" . consult-compile-error)
-             ("M-g o" . consult-outline) ;; Alternativa: consult-org-heading
-             ("M-g i" . consult-imenu)
-             ("M-g I" . consult-imenu-multi)
-             ("M-g f" . consult-flymake)
-             ;; M-s bindings (search-map)
-             ("M-s d" . consult-find)
-             ("M-s D" . consult-locate)
-             ("M-s g" . consult-grep)
-             ("M-s G" . consult-git-grep)
-             ("M-s r" . consult-ripgrep)
-             ("M-s l" . consult-line)
-             ("M-s L" . consult-line-multi)
-             ("M-s i" . consult-info)
-             ;; Isearch integration
-             ("M-s e" . consult-isearch-history))
-      )
+    ;; By default `consult-project-function' uses `project-root' from project.el.
+    ;; Optionally configure a different project root function.
+             ;;;; 1. project.el (the default)
+    ;; (setq consult-project-function #'consult--default-project--function)
+             ;;;; 2. vc.el (vc-root-dir)
+    ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+             ;;;; 3. locate-dominating-file
+    ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+             ;;;; 4. projectile.el (projectile-project-root)
+    (autoload 'projectile-project-root "projectile")
+    (setq consult-project-function (lambda (_) (projectile-project-root)))
+             ;;;; 5. No project support
+    ;; (setq consult-project-function nil)
+    :bind (
+           ;; ("C-c M-x" . consult-mode-command)
+           ;; C-x bindings (ctrl-x-map)
+           ("C-x M-:" . consult-complex-command)
+           ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
+           ("C-x r b" . consult-bookmark) ;; orig. bookmark-jump
+           ("M-y" . consult-yank-pop) ;; orig. yank-pop
+           ;; M-g bindings (goto-map)
+           ("M-g e" . consult-compile-error)
+           ("M-g o" . consult-outline) ;; Alternativa: consult-org-heading
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ("M-g f" . consult-flymake)
+           ;; M-s bindings (search-map)
+           ("M-s d" . consult-find)
+           ("M-s D" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s i" . consult-info)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history))
+    )
 #+end_src
 
 ** Embark-consult

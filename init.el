@@ -27,95 +27,77 @@
                          ("elpa" . "https://elpa.gnu.org/packages/")
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 
-(use-package evil
-  :init ;; Execute code Before a package is loaded
-  (evil-mode)
-  :config ;; Execute code After a package is loaded
-  (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-  :custom ;; Customization of package custom variables
-  (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-  (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-  (evil-want-C-i-jump nil)      ;; Disables C-i jump
-  (evil-undo-system 'undo-redo) ;; C-r to redo
-  (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-  ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-  :bind (:map evil-motion-state-map
-              ("SPC" . nil)
-              ("RET" . nil)
-              ("TAB" . nil)))
-(use-package evil-collection
-  :after evil
-  :config
-  ;; Setting where to use evil-collection
-  (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult))
-  (evil-collection-init))
-
 (use-package general
-  :config
-  (general-evil-setup)
-  ;; Set up 'SPC' as the leader key
-  (general-create-definer start/leader-keys
-    :states '(normal insert visual motion emacs)
-    :keymaps 'override
-    :prefix "SPC"           ;; Set leader key
-    :global-prefix "C-SPC") ;; Set global leader key
+:init 
+(general-auto-unbind-keys)
+    :config
+    ;; (general-evil-setup)
+    ;; Set up 'C-c' as the leader key
+    (general-create-definer start/leader-keys
+      :prefix "C-c")           ;; Set leader key
 
-  (start/leader-keys
-    "." '(find-file :wk "Find file")
-    "TAB" '(comment-line :wk "Comment lines")
-    "p" '(projectile-command-map :wk "Projectile command map"))
+    (start/leader-keys
+      "." '(find-file :wk "Find file")
+      "TAB" '(comment-line :wk "Comment lines")
+      "p" '(projectile-command-map :wk "Projectile command map"))
 
-  (start/leader-keys
-    "f" '(:ignore t :wk "Find")
-    "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-    "f r" '(consult-recent-file :wk "Recent files")
-    "f f" '(consult-fd :wk "Fd search for files")
-    "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-    "f l" '(consult-line :wk "Find line")
-    "f i" '(consult-imenu :wk "Imenu buffer locations"))
+    (start/leader-keys
+      "f" '(:ignore t :wk "Find")
+      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+      "f r" '(consult-recent-file :wk "Recent files")
+      "f f" '(consult-fd :wk "Fd search for files")
+      "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+      "f l" '(consult-line :wk "Find line")
+      "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-  (start/leader-keys
-    "b" '(:ignore t :wk "Buffer Bookmarks")
-    "b b" '(consult-buffer :wk "Switch buffer")
-    "b k" '(kill-this-buffer :wk "Kill this buffer")
-    "b i" '(ibuffer :wk "Ibuffer")
-    "b n" '(next-buffer :wk "Next buffer")
-    "b p" '(previous-buffer :wk "Previous buffer")
-    "b r" '(revert-buffer :wk "Reload buffer")
-    "b j" '(consult-bookmark :wk "Bookmark jump"))
+    (start/leader-keys
+      "b" '(:ignore t :wk "Buffer Bookmarks")
+      "b b" '(consult-buffer :wk "Switch buffer")
+      "b k" '(kill-this-buffer :wk "Kill this buffer")
+      "b i" '(ibuffer :wk "Ibuffer")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-  (start/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d v" '(dired :wk "Open dired")
-    "d j" '(dired-jump :wk "Dired jump to current"))
+    (start/leader-keys
+      "c" '(:ignore t :wk "ChatGPT")
+      "c c" '(gptel :wk "Start")
+      "c s" '(gptel-send :wk "Send")
+      "c m" '(gptel-menu :wk "Menu"))
 
-  (start/leader-keys
-    "e" '(:ignore t :wk "Eglot Evaluate")
-    "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-    "e f" '(eglot-format :wk "Eglot Format")
-    "e l" '(consult-flymake :wk "Consult Flymake")
-    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "e r" '(eval-region :wk "Evaluate elisp in region"))
+    (start/leader-keys
+      "d" '(:ignore t :wk "Dired")
+      "d v" '(dired :wk "Open dired")
+      "d j" '(dired-jump :wk "Dired jump to current"))
 
-  (start/leader-keys
-    "g" '(:ignore t :wk "Git")
-    "g g" '(magit-status :wk "Magit status"))
+    (start/leader-keys
+      "e" '(:ignore t :wk "Eglot Evaluate")
+      "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+      "e f" '(eglot-format :wk "Eglot Format")
+      "e l" '(consult-flymake :wk "Consult Flymake")
+      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+      "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-  (start/leader-keys
-    "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-    "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-    "h r" '((lambda () (interactive)
-              (load-file "~/.config/emacs/init.el"))
-            :wk "Reload Emacs config"))
+    (start/leader-keys
+      "g" '(:ignore t :wk "Git")
+      "g g" '(magit-status :wk "Magit status"))
 
-  (start/leader-keys
-    "s" '(:ignore t :wk "Show")
-    "s e" '(eat :wk "Eat terminal"))
+    (start/leader-keys
+      "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+      "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+      "h r" '((lambda () (interactive)
+                (load-file "~/.config/emacs/init.el"))
+              :wk "Reload Emacs config"))
 
-  (start/leader-keys
-    "t" '(:ignore t :wk "Toggle")
-    "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-    "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+    (start/leader-keys
+      "s" '(:ignore t :wk "Show")
+      "s e" '(eat :wk "Eat terminal"))
+
+    (start/leader-keys
+      "t" '(:ignore t :wk "Toggle")
+      "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
 (use-package emacs
   :custom
@@ -135,7 +117,7 @@
   (recentf-mode t) ;; Enable recent file mode
 
   ;;(global-visual-line-mode t)           ;; Enable truncated lines
-  (display-line-numbers-type 'relative) ;; Relative line numbers
+  ;; (display-line-numbers-type 'relative) ;; Relative line numbers
   (global-display-line-numbers-mode t)  ;; Display line numbers
 
   (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
@@ -146,6 +128,7 @@
 
   (make-backup-files nil) ;; Stop creating ~ backup files
   (auto-save-default nil) ;; Stop creating # auto save files
+  (visible-bell t) ;; Turn off audible bell
   :hook
   (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
   :config
@@ -156,12 +139,12 @@
          ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
          )
   ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-  :ghook ('after-init-hook
-          (lambda (&rest _)
-            (when-let ((messages-buffer (get-buffer "*Messages*")))
-              (with-current-buffer messages-buffer
-                (evil-normalize-keymaps))))
-          nil nil t)
+  ;; :ghook ('after-init-hook
+  ;;         (lambda (&rest _)
+  ;;           (when-let ((messages-buffer (get-buffer "*Messages*")))
+  ;;             (with-current-buffer messages-buffer
+  ;;               (evil-normalize-keymaps))))
+  ;;         nil nil t)
   )
 
 (fset 'yes-or-no-p 'y-or-n-p) ; accept y/n instead of yes/no in prompts
@@ -170,6 +153,9 @@
   :ensure t
   :config
   (amx-mode 1))
+
+(setq user-full-name "Hien Huynh-Minh"
+      user-mail-address "blackcat22121996@gmail.com")
 
 (use-package gruvbox-theme
   :config
@@ -315,6 +301,41 @@
 ;;   :ensure t)
 ;; you can utilize :map :hook and :config to customize copilot
 
+(defun me/read-openai-key ()
+  (with-temp-buffer
+    (insert-file-contents "./key.txt")
+    (string-trim (buffer-string))))
+
+(use-package gptel
+  :config
+  (setq gptel-playback t)
+  (setq gptel-api-key #'me/read-openai-key)
+  (setq gptel-default-mode 'org-mode)
+  (setq gptel-model "gpt-4o-mini"))
+
+(defun ad/ai-from-anywhere ()
+(interactive)
+(let* ((screen-width (display-pixel-width))
+       (screen-height (display-pixel-height))
+       (frame-width (/ screen-width 3))
+       (frame-height screen-height)
+       (frame-left (- screen-width frame-width))
+       (frame-top 0)
+       (chat-frame (make-frame `((window-system . ns)  ;;change this if you are not on macOS. For example you can use "x" instead of "ns" for x systems. Refer to make-frame documentation for more details
+                            (top . ,frame-top)
+                            (left . ,frame-left)
+                            (width . (text-pixels . ,frame-width))
+                            (heigth . (text-pixels . ,frame-height))
+                            (minibuffer . t)
+                            ))))
+  (select-frame chat-frame)
+  )
+  (add-hook 'gptel-post-response-hook (lambda () (goto-char (point-max))))
+  (gptel "My:AI Chat" gptel-api-key nil)
+  (switch-to-buffer "My:AI Chat")
+  (delete-other-windows)
+)
+
 ;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
 ;; (require 'start-multiFileExample)
@@ -338,6 +359,14 @@
          (magit-pre-refresh  . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode))
+
+(use-package hl-todo
+:defer t
+:config (global-hl-todo-mode 1))
+
+(use-package magit-todos
+  :after (magit)
+  :config (magit-todos-mode 1))
 
 (use-package corfu
   ;; Optional customizations
@@ -466,7 +495,7 @@
            ;;;; 5. No project support
   ;; (setq consult-project-function nil)
   :bind (
-         ("C-c M-x" . consult-mode-command)
+         ;; ("C-c M-x" . consult-mode-command)
          ;; C-x bindings (ctrl-x-map)
          ("C-x M-:" . consult-complex-command)
          ("C-x b" . consult-buffer) ;; orig. switch-to-buffer
