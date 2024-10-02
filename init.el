@@ -87,8 +87,11 @@
       "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
       "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
       "h r" '((lambda () (interactive)
-                (load-file "~/.config/emacs/init.el"))
+                (load-file "~/emacs.d/init.el"))
               :wk "Reload Emacs config"))
+
+    (start/leader-keys
+      "o" '(:ignore t :wk "Combobulate"))
 
     (start/leader-keys
       "s" '(:ignore t :wk "Show")
@@ -267,6 +270,16 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
+(use-package combobulate
+  :custom
+  ;; You can customize Combobulate's key prefix here.
+  ;; Note that you may have to restart Emacs for this to take effect!
+  (combobulate-key-prefix "C-c o")
+  :hook ((prog-mode . combobulate-mode))
+  ;; Amend this to the directory where you keep Combobulate's source
+  ;; code.
+  :load-path ("~/.emacs.d/assets/combobulate/"))
+
 (use-package ruby-ts-mode
   :mode "\\.rb\\'"
   :mode "Rakefile\\'"
@@ -277,6 +290,8 @@
   :custom
   (ruby-indent-level 2)
   (ruby-indent-tabs-mode nil))
+
+(use-package inf-ruby)
 
 (use-package eldoc
   :init
@@ -290,6 +305,47 @@
 (use-package markdown-mode
   :ensure t
   :magic "\\.md\\'")
+
+(use-package web-mode
+  :config
+  (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'"))
+        web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-enable-css-colorization t
+        web-mode-enable-auto-pairing t
+        web-mode-enable-current-element-highlight t))
+(add-to-list 'auto-mode-alist '("\\.jsx?$" . web-mode))
+
+(use-package flycheck
+  :ensure t)
+(require 'flycheck)
+
+(setq-default flycheck-disabled-checkers
+              (append flycheck-disabled-checkers
+                      '(javascript-jshint json-jsonlist)))
+
+;; Enable eslint checker for web-mode
+(flycheck-add-mode 'javascript-eslint 'web-mode)
+;; Enable flycheck globally
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+(use-package add-node-modules-path
+  :hook (flycheck-mode . add-node-modules-path))
+
+(use-package emmet-mode)
+
+(use-package apheleia
+  :ensure apheleia
+  :diminish ""
+  :defines
+  apheleia-formatters
+  apheleia-mode-alist
+  :functions
+  apheleia-global-mode
+  :config
+  (setf (alist-get 'prettier-json apheleia-formatters)
+        '("prettier" "--stdin-filepath" filepath))
+  (apheleia-global-mode +1))
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -354,15 +410,47 @@
 (use-package magit
   :commands magit-status)
 
+(defmacro pretty-magit (WORD ICON PROPS &optional NO-PROMPT?)
+      "Replace sanitized WORD with ICON, PROPS and by default add to prompt."
+      `(prog1
+           (add-to-list 'pretty-magit-alist
+                        (list (rx bow (group ,WORD (eval (if ,NO-PROMPT? "" ":"))))
+                              ,ICON ',PROPS))
+         (unless ,NO-PROMPT?
+           (add-to-list 'pretty-magit-prompt (concat ,WORD ": ")))))
+  (setq pretty-magit-alist nil)
+  (setq pretty-magit-prompt nil)
+  (pretty-magit "Feature" ? (:foreground "slate gray" :height 1.2))
+  (pretty-magit "Add"     ? (:foreground "#375E97" :height 1.2))
+  (pretty-magit "Fix"     ? (:foreground "#FB6542" :height 1.2))
+  (pretty-magit "Clean"   ? (:foreground "#FFBB00" :height 1.2))
+  (pretty-magit "Docs"    ? (:foreground "#3F681C" :height 1.2))
+  ;; (pretty-magit "master"  ? (:box t :height 1.2) t)
+  ;; (pretty-magit "origin"  ? (:box t :height 1.2) t)
+
+(defun add-magit-faces ()
+  "Add face properties and compose symbols for buffer from pretty-magit."
+  (interactive)
+  (with-silent-modifications
+    (--each pretty-magit-alist
+      (-let (((rgx icon props) it))
+        (save-excursion
+          (goto-char (point-min))
+          (while (search-forward-regexp rgx nil t)
+            (compose-region
+             (match-beginning 1) (match-end 1) icon)
+            (when props
+              (add-face-text-property
+               (match-beginning 1) (match-end 1) props))))))))
+
+(advice-add 'magit-status :after 'add-magit-faces)
+(advice-add 'magit-refresh-buffer :after 'add-magit-faces)
+
 (use-package diff-hl
   :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
          (magit-pre-refresh  . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode))
-
-(use-package hl-todo
-:defer t
-:config (global-hl-todo-mode 1))
 
 (use-package magit-todos
   :after (magit)
@@ -575,6 +663,62 @@
 :defer t
 :config (pdf-tools-install))
 
+(use-package expand-region
+  :ensure t
+  :defer t
+  :bind (("C-=" . er/expand-region)))
+
+(use-package neotree
+  :config
+  ;; modified version of https://github.com/hemmvm/dotemacs/blob/master/site-lisp/util--neotree.el
+  (defun neotree-project-tree-open ()
+    (interactive)
+    (let ((project-dir (ignore-errors (projectile-project-root)))
+          (file-name (buffer-file-name)))
+      (if project-dir
+          (progn
+            (neotree-dir project-dir)
+            (neotree-find file-name))
+        (neotree-find)))
+    (neo-global--select-window))
+  
+  (defun neotree-project-tree-toggle ()
+    (interactive)
+    (if (neo-global--window-exists-p)
+        (neotree-hide)
+      (neotree-project-tree-open)))
+  
+  (global-set-key [f8] 'neotree-project-tree-toggle)
+  
+  (setq neo-theme 'arrow)
+  (setq neo-window-width 35)
+  
+  ;; https://github.com/jaypei/emacs-neotree/issues/77 + https://github.com/hemmvm/dotemacs/blob/master/site-lisp/util--neotree.el
+  (defun custom-neotree-enter-hide ()
+    (interactive)
+    (neotree-enter)
+    (let ((current (neo-buffer--get-filename-current-line)))
+      (if (not (and current (file-accessible-directory-p current)))
+          (neotree-hide)))
+    )
+  
+  (defun custom-neotree-peek ()
+    (interactive)
+    (let ((neo-window (neo-global--get-window)))
+      (neotree-enter)
+      (select-window neo-window))
+    )
+  
+  (add-hook
+   'neotree-mode-hook
+   (lambda ()
+     (define-key neotree-mode-map (kbd "RET") 'custom-neotree-enter-hide)))
+  
+  (add-hook
+   'neotree-mode-hook
+   (lambda ()
+     (define-key neotree-mode-map (kbd "TAB") 'custom-neotree-peek))))
+
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
 ;; Increase the amount of data which Emacs reads from the process
@@ -642,3 +786,11 @@
 (add-hook 'org-babel-after-execute-hook 'my/display-inline-images 'append)
 
 (require 'ox-publish)
+
+(use-package dslide
+  :ensure t)
+
+(use-package master-of-ceremonies
+  :ensure t)
+
+

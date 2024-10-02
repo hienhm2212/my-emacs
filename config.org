@@ -54,6 +54,8 @@
   - [[#wc-mode][Wc Mode]]
   - [[#rotate][Rotate]]
   - [[#pdf-tools][PDF Tools]]
+  - [[#expand-region][Expand Region]]
+  - [[#neotree][Neotree]]
 - [[#runtime-performance][Runtime Performance]]
 - [[#org-mode][Org Mode]]
   - [[#table-of-contents][Table of Contents]]
@@ -64,6 +66,8 @@
   - [[#latex-previews-with-org][LaTeX previews with Org]]
   - [[#image-handling-in-the-org-file][Image handling in the Org file]]
   - [[#org-publish][Org Publish]]
+  - [[#org-presentation][Org Presentation]]
+- [[#weather-tools][Weather Tools]]
 
 * Introduction
 #+begin_src emacs-lisp
@@ -167,77 +171,80 @@ A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
 #+begin_src emacs-lisp
-  (use-package general
-:init 
-(general-auto-unbind-keys)
-    :config
-    ;; (general-evil-setup)
-    ;; Set up 'C-c' as the leader key
-    (general-create-definer start/leader-keys
-      :prefix "C-c")           ;; Set leader key
+      (use-package general
+    :init 
+    (general-auto-unbind-keys)
+        :config
+        ;; (general-evil-setup)
+        ;; Set up 'C-c' as the leader key
+        (general-create-definer start/leader-keys
+          :prefix "C-c")           ;; Set leader key
 
-    (start/leader-keys
-      "." '(find-file :wk "Find file")
-      "TAB" '(comment-line :wk "Comment lines")
-      "p" '(projectile-command-map :wk "Projectile command map"))
+        (start/leader-keys
+          "." '(find-file :wk "Find file")
+          "TAB" '(comment-line :wk "Comment lines")
+          "p" '(projectile-command-map :wk "Projectile command map"))
 
-    (start/leader-keys
-      "f" '(:ignore t :wk "Find")
-      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-      "f r" '(consult-recent-file :wk "Recent files")
-      "f f" '(consult-fd :wk "Fd search for files")
-      "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-      "f l" '(consult-line :wk "Find line")
-      "f i" '(consult-imenu :wk "Imenu buffer locations"))
+        (start/leader-keys
+          "f" '(:ignore t :wk "Find")
+          "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+          "f r" '(consult-recent-file :wk "Recent files")
+          "f f" '(consult-fd :wk "Fd search for files")
+          "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+          "f l" '(consult-line :wk "Find line")
+          "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-    (start/leader-keys
-      "b" '(:ignore t :wk "Buffer Bookmarks")
-      "b b" '(consult-buffer :wk "Switch buffer")
-      "b k" '(kill-this-buffer :wk "Kill this buffer")
-      "b i" '(ibuffer :wk "Ibuffer")
-      "b n" '(next-buffer :wk "Next buffer")
-      "b p" '(previous-buffer :wk "Previous buffer")
-      "b r" '(revert-buffer :wk "Reload buffer")
-      "b j" '(consult-bookmark :wk "Bookmark jump"))
+        (start/leader-keys
+          "b" '(:ignore t :wk "Buffer Bookmarks")
+          "b b" '(consult-buffer :wk "Switch buffer")
+          "b k" '(kill-this-buffer :wk "Kill this buffer")
+          "b i" '(ibuffer :wk "Ibuffer")
+          "b n" '(next-buffer :wk "Next buffer")
+          "b p" '(previous-buffer :wk "Previous buffer")
+          "b r" '(revert-buffer :wk "Reload buffer")
+          "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-    (start/leader-keys
-      "c" '(:ignore t :wk "ChatGPT")
-      "c c" '(gptel :wk "Start")
-      "c s" '(gptel-send :wk "Send")
-      "c m" '(gptel-menu :wk "Menu"))
+        (start/leader-keys
+          "c" '(:ignore t :wk "ChatGPT")
+          "c c" '(gptel :wk "Start")
+          "c s" '(gptel-send :wk "Send")
+          "c m" '(gptel-menu :wk "Menu"))
 
-    (start/leader-keys
-      "d" '(:ignore t :wk "Dired")
-      "d v" '(dired :wk "Open dired")
-      "d j" '(dired-jump :wk "Dired jump to current"))
+        (start/leader-keys
+          "d" '(:ignore t :wk "Dired")
+          "d v" '(dired :wk "Open dired")
+          "d j" '(dired-jump :wk "Dired jump to current"))
 
-    (start/leader-keys
-      "e" '(:ignore t :wk "Eglot Evaluate")
-      "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-      "e f" '(eglot-format :wk "Eglot Format")
-      "e l" '(consult-flymake :wk "Consult Flymake")
-      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-      "e r" '(eval-region :wk "Evaluate elisp in region"))
+        (start/leader-keys
+          "e" '(:ignore t :wk "Eglot Evaluate")
+          "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+          "e f" '(eglot-format :wk "Eglot Format")
+          "e l" '(consult-flymake :wk "Consult Flymake")
+          "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+          "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-    (start/leader-keys
-      "g" '(:ignore t :wk "Git")
-      "g g" '(magit-status :wk "Magit status"))
+        (start/leader-keys
+          "g" '(:ignore t :wk "Git")
+          "g g" '(magit-status :wk "Magit status"))
 
-    (start/leader-keys
-      "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-      "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-      "h r" '((lambda () (interactive)
-                (load-file "~/.config/emacs/init.el"))
-              :wk "Reload Emacs config"))
+        (start/leader-keys
+          "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+          "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+          "h r" '((lambda () (interactive)
+                    (load-file "~/emacs.d/init.el"))
+                  :wk "Reload Emacs config"))
 
-    (start/leader-keys
-      "s" '(:ignore t :wk "Show")
-      "s e" '(eat :wk "Eat terminal"))
+        (start/leader-keys
+          "o" '(:ignore t :wk "Combobulate"))
 
-    (start/leader-keys
-      "t" '(:ignore t :wk "Toggle")
-      "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+        (start/leader-keys
+          "s" '(:ignore t :wk "Show")
+          "s e" '(eat :wk "Eat terminal"))
+
+        (start/leader-keys
+          "t" '(:ignore t :wk "Toggle")
+          "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+          "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 #+end_src
 
 ** Good Defaults
@@ -479,6 +486,18 @@ Currently it's tedious to use Treesitter, because emacs has not yet fully migrat
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 #+end_src
+*** Treesit
+#+begin_src emacs-lisp
+  (use-package combobulate
+    :custom
+    ;; You can customize Combobulate's key prefix here.
+    ;; Note that you may have to restart Emacs for this to take effect!
+    (combobulate-key-prefix "C-c o")
+    :hook ((prog-mode . combobulate-mode))
+    ;; Amend this to the directory where you keep Combobulate's source
+    ;; code.
+    :load-path ("~/.emacs.d/assets/combobulate/"))
+#+end_src
 *** Lua mode
 Example, how to setup a language mode (if you don't want it, feel free to delete it).
 Use SPC-tab to uncomment the lines.
@@ -500,6 +519,10 @@ Setup ruby mode
       (ruby-indent-level 2)
       (ruby-indent-tabs-mode nil))
     
+#+end_src
+**** Inf-ruby
+#+begin_src emacs-lisp
+(use-package inf-ruby)
 #+end_src
 *** Eldoc
 Eldoc is Emacs's documentation library.
@@ -524,6 +547,67 @@ Emacs has built-in on-the-fly syntax checker called Flymake.
     (use-package markdown-mode
       :ensure t
       :magic "\\.md\\'")
+#+end_src
+*** React
+Configuring Emacs for React, Es6, and flow.
+**** Setup web-mode
+#+begin_src emacs-lisp
+              (use-package web-mode
+                :config
+                (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'"))
+                      web-mode-markup-indent-offset 2
+                      web-mode-css-indent-offset 2
+                      web-mode-enable-css-colorization t
+                      web-mode-enable-auto-pairing t
+                      web-mode-enable-current-element-highlight t))
+              (add-to-list 'auto-mode-alist '("\\.jsx?$" . web-mode))
+#+end_src
+**** Linter setup
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :ensure t)
+  (require 'flycheck)
+#+end_src
+Disable the default jslint:
+#+begin_src emacs-lisp
+    (setq-default flycheck-disabled-checkers
+                  (append flycheck-disabled-checkers
+                          '(javascript-jshint json-jsonlist)))
+#+end_src
+
+Use a global ~eslint~
+Enable eslint checker when web-mode is activated:
+#+begin_src emacs-lisp
+;; Enable eslint checker for web-mode
+(flycheck-add-mode 'javascript-eslint 'web-mode)
+;; Enable flycheck globally
+(add-hook 'after-init-hook #'global-flycheck-mode)
+#+end_src
+***** Use a local eslint from node_modules
+To use ~eslint~ and a config from a project's local node_modules, use the following:
+#+begin_src emacs-lisp
+    (use-package add-node-modules-path
+      :hook (flycheck-mode . add-node-modules-path))
+#+end_src
+**** Emmet Mode
+#+begin_src emacs-lisp
+(use-package emmet-mode)
+#+end_src
+
+*** Formatting buffers with prettier
+#+begin_src emacs-lisp
+  (use-package apheleia
+    :ensure apheleia
+    :diminish ""
+    :defines
+    apheleia-formatters
+    apheleia-mode-alist
+    :functions
+    apheleia-global-mode
+    :config
+    (setf (alist-get 'prettier-json apheleia-formatters)
+          '("prettier" "--stdin-filepath" filepath))
+    (apheleia-global-mode +1))
 #+end_src
 ** Terminal
 *** Eat
@@ -637,7 +721,46 @@ Complete text-based user interface to Git.
     (use-package magit
       :commands magit-status)
 #+end_src
+*** Pretty Magit
+**** Adding leaders
+We cannot use font-locks so we compose the symbols and add the face text properties ourselve.
+#+begin_src emacs-lisp
+    (defmacro pretty-magit (WORD ICON PROPS &optional NO-PROMPT?)
+      "Replace sanitized WORD with ICON, PROPS and by default add to prompt."
+      `(prog1
+           (add-to-list 'pretty-magit-alist
+                        (list (rx bow (group ,WORD (eval (if ,NO-PROMPT? "" ":"))))
+                              ,ICON ',PROPS))
+         (unless ,NO-PROMPT?
+           (add-to-list 'pretty-magit-prompt (concat ,WORD ": ")))))
+  (setq pretty-magit-alist nil)
+  (setq pretty-magit-prompt nil)
+  (pretty-magit "Feature" ? (:foreground "slate gray" :height 1.2))
+  (pretty-magit "Add"     ? (:foreground "#375E97" :height 1.2))
+  (pretty-magit "Fix"     ? (:foreground "#FB6542" :height 1.2))
+  (pretty-magit "Clean"   ? (:foreground "#FFBB00" :height 1.2))
+  (pretty-magit "Docs"    ? (:foreground "#3F681C" :height 1.2))
+  ;; (pretty-magit "master"  ? (:box t :height 1.2) t)
+  ;; (pretty-magit "origin"  ? (:box t :height 1.2) t)
 
+(defun add-magit-faces ()
+  "Add face properties and compose symbols for buffer from pretty-magit."
+  (interactive)
+  (with-silent-modifications
+    (--each pretty-magit-alist
+      (-let (((rgx icon props) it))
+        (save-excursion
+          (goto-char (point-min))
+          (while (search-forward-regexp rgx nil t)
+            (compose-region
+             (match-beginning 1) (match-end 1) icon)
+            (when props
+              (add-face-text-property
+               (match-beginning 1) (match-end 1) props))))))))
+
+(advice-add 'magit-status :after 'add-magit-faces)
+(advice-add 'magit-refresh-buffer :after 'add-magit-faces)
+#+end_src
 *** Diff-hl
 Highlights uncommitted changes on the left side of the window (area also known as the "gutter"), allows you to jump between and revert them selectively.
 #+begin_src emacs-lisp
@@ -650,10 +773,18 @@ Highlights uncommitted changes on the left side of the window (area also known a
 
 *** Magit Todos
 First, setup ~hl-todo~.
-#+begin_src emacs-lisp
-(use-package hl-todo
-:defer t
-:config (global-hl-todo-mode 1))
+#+begin_src emacs-lisp :tangle no
+    (use-package hl-todo
+    :defer t
+    :hook ((org-mode . hl-todo-mode)
+           (prog-mode . hl-todo-mode))
+    :config (
+             (setq hl-todo-highlight-punctuation ":"
+                   hl-todo-keyword-faces
+                   `(("TODO" warning bold)
+                     ("FIXME" error bold)
+                     ("NOTE" success bold)
+                     ("REVIEW" font-lock-keyword-face bold)))))
 #+end_src
 This package displays keyword entries from source code comments and Org files in the Magit status buffer.
 #+begin_src emacs-lisp
@@ -931,6 +1062,69 @@ Emacs looks like a tilling window manager, but why not use it like a dynamic win
 :defer t
 :config (pdf-tools-install))
 #+end_src
+
+** Expand Region
+#+begin_src emacs-lisp
+  (use-package expand-region
+    :ensure t
+    :defer t
+    :bind (("C-=" . er/expand-region)))
+#+end_src
+
+** Neotree
+#+begin_src emacs-lisp
+(use-package neotree
+  :config
+  ;; modified version of https://github.com/hemmvm/dotemacs/blob/master/site-lisp/util--neotree.el
+  (defun neotree-project-tree-open ()
+    (interactive)
+    (let ((project-dir (ignore-errors (projectile-project-root)))
+          (file-name (buffer-file-name)))
+      (if project-dir
+          (progn
+            (neotree-dir project-dir)
+            (neotree-find file-name))
+        (neotree-find)))
+    (neo-global--select-window))
+  
+  (defun neotree-project-tree-toggle ()
+    (interactive)
+    (if (neo-global--window-exists-p)
+        (neotree-hide)
+      (neotree-project-tree-open)))
+  
+  (global-set-key [f8] 'neotree-project-tree-toggle)
+  
+  (setq neo-theme 'arrow)
+  (setq neo-window-width 35)
+  
+  ;; https://github.com/jaypei/emacs-neotree/issues/77 + https://github.com/hemmvm/dotemacs/blob/master/site-lisp/util--neotree.el
+  (defun custom-neotree-enter-hide ()
+    (interactive)
+    (neotree-enter)
+    (let ((current (neo-buffer--get-filename-current-line)))
+      (if (not (and current (file-accessible-directory-p current)))
+          (neotree-hide)))
+    )
+  
+  (defun custom-neotree-peek ()
+    (interactive)
+    (let ((neo-window (neo-global--get-window)))
+      (neotree-enter)
+      (select-window neo-window))
+    )
+  
+  (add-hook
+   'neotree-mode-hook
+   (lambda ()
+     (define-key neotree-mode-map (kbd "RET") 'custom-neotree-enter-hide)))
+  
+  (add-hook
+   'neotree-mode-hook
+   (lambda ()
+     (define-key neotree-mode-map (kbd "TAB") 'custom-neotree-peek))))
+#+end_src
+
 * Runtime Performance
 Dial the GC threshold back down so that garbage collection happens more frequently but in less time.
 We also increase Read Process Output Max so emacs can read more data.
@@ -1040,5 +1234,20 @@ One consistent headache with Org image handling is that it does not resize image
 ** Org Publish
 #+begin_src emacs-lisp
     (require 'ox-publish)
+#+end_src
+
+** Org Presentation
+*** Dslide
+#+begin_src emacs-lisp
+  (use-package dslide
+    :ensure t)
+#+end_src
+*** Master of Ceremonies
+#+begin_src emacs-lisp
+  (use-package master-of-ceremonies
+    :ensure t)
+#+end_src
+* Weather Tools
+#+begin_src emacs-lisp
 
 #+end_src
