@@ -27,80 +27,101 @@
                          ("elpa" . "https://elpa.gnu.org/packages/")
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize))
+
 (use-package general
-:init 
-(general-auto-unbind-keys)
-    :config
-    ;; (general-evil-setup)
-    ;; Set up 'C-c' as the leader key
-    (general-create-definer start/leader-keys
-      :prefix "C-c")           ;; Set leader key
+  :init 
+  (general-auto-unbind-keys)
+  :config
+  ;; (general-evil-setup)
+  ;; Set up 'C-c' as the leader key
+  (general-create-definer start/leader-keys
+    :prefix "C-c")           ;; Set leader key
 
-    (start/leader-keys
-      "." '(find-file :wk "Find file")
-      "TAB" '(comment-line :wk "Comment lines")
-      "p" '(projectile-command-map :wk "Projectile command map"))
+  (start/leader-keys
+    "." '(find-file :wk "Find file")
+    "TAB" '(comment-line :wk "Comment lines")
+    "p" '(projectile-command-map :wk "Projectile command map"))
 
-    (start/leader-keys
-      "f" '(:ignore t :wk "Find")
-      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-      "f r" '(consult-recent-file :wk "Recent files")
-      "f f" '(consult-fd :wk "Fd search for files")
-      "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-      "f l" '(consult-line :wk "Find line")
-      "f i" '(consult-imenu :wk "Imenu buffer locations"))
+  (start/leader-keys
+    "f" '(:ignore t :wk "Find")
+    "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+    "f r" '(consult-recent-file :wk "Recent files")
+    "f f" '(consult-fd :wk "Fd search for files")
+    "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+    "f l" '(consult-line :wk "Find line")
+    "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-    (start/leader-keys
-      "b" '(:ignore t :wk "Buffer Bookmarks")
-      "b b" '(consult-buffer :wk "Switch buffer")
-      "b k" '(kill-this-buffer :wk "Kill this buffer")
-      "b i" '(ibuffer :wk "Ibuffer")
-      "b n" '(next-buffer :wk "Next buffer")
-      "b p" '(previous-buffer :wk "Previous buffer")
-      "b r" '(revert-buffer :wk "Reload buffer")
-      "b j" '(consult-bookmark :wk "Bookmark jump"))
+  (start/leader-keys
+    "a" '(:ignore t :wk "Avy")
+    "a a" '(avy-goto-char-timer :wk "Go to char")
+    "a i" '(avy-isearch :wk "Isearch")
+    "a w" '(avy-goto-word-1 :wk "Go to word")
+    "a l" '(avy-goto-line :wk "Go to line")
+    "a o" '(avy-goto-org-headline :wk "Go to org headline"))
 
-    (start/leader-keys
-      "c" '(:ignore t :wk "ChatGPT")
-      "c c" '(gptel :wk "Start")
-      "c s" '(gptel-send :wk "Send")
-      "c m" '(gptel-menu :wk "Menu"))
+  (start/leader-keys
+    "b" '(:ignore t :wk "Buffer Bookmarks")
+    "b b" '(consult-buffer :wk "Switch buffer")
+    "b k" '(kill-this-buffer :wk "Kill this buffer")
+    "b i" '(ibuffer :wk "Ibuffer")
+    "b n" '(next-buffer :wk "Next buffer")
+    "b p" '(previous-buffer :wk "Previous buffer")
+    "b r" '(revert-buffer :wk "Reload buffer")
+    "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-    (start/leader-keys
-      "d" '(:ignore t :wk "Dired")
-      "d v" '(dired :wk "Open dired")
-      "d j" '(dired-jump :wk "Dired jump to current"))
+  (start/leader-keys
+    "c" '(:ignore t :wk "ChatGPT")
+    "c c" '(gptel :wk "Start")
+    "c s" '(gptel-send :wk "Send")
+    "c m" '(gptel-menu :wk "Menu"))
 
-    (start/leader-keys
-      "e" '(:ignore t :wk "Eglot Evaluate")
-      "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-      "e f" '(eglot-format :wk "Eglot Format")
-      "e l" '(consult-flymake :wk "Consult Flymake")
-      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-      "e r" '(eval-region :wk "Evaluate elisp in region"))
+  (start/leader-keys
+    "d" '(:ignore t :wk "Dired")
+    "d v" '(dired :wk "Open dired")
+    "d j" '(dired-jump :wk "Dired jump to current"))
 
-    (start/leader-keys
-      "g" '(:ignore t :wk "Git")
-      "g g" '(magit-status :wk "Magit status"))
+  (start/leader-keys
+    "e" '(:ignore t :wk "Eglot Evaluate")
+    "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+    "e f" '(eglot-format :wk "Eglot Format")
+    "e l" '(consult-flymake :wk "Consult Flymake")
+    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+    "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-    (start/leader-keys
-      "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-      "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-      "h r" '((lambda () (interactive)
-                (load-file "~/emacs.d/init.el"))
-              :wk "Reload Emacs config"))
+  (start/leader-keys
+    "g" '(:ignore t :wk "Git")
+    "g g" '(magit-status :wk "Magit status"))
 
-    (start/leader-keys
-      "o" '(:ignore t :wk "Combobulate"))
+  (start/leader-keys
+    "j" '(:ignore t :wk "Dumb Jump")
+    "j g" '(dumb-jump-go :wk "Dumb jump go")
+    "j o" '(dumb-jump-go-other-window :wk "Dumb jump go other window")
+    "j i" '(dumb-jump-go-prompt :wk "Dumb jump go prompt")
+    "j x" '(dumb-jump-go-prefer-external :wk "Dumb jump go prefer external")
+    "j b" '(dumb-jump-back :wk "Dumb jump back"))
 
-    (start/leader-keys
-      "s" '(:ignore t :wk "Show")
-      "s e" '(eat :wk "Eat terminal"))
+  (start/leader-keys
+    "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+    "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+    "h r" '((lambda () (interactive)
+              (load-file "~/emacs.d/init.el"))
+            :wk "Reload Emacs config"))
 
-    (start/leader-keys
-      "t" '(:ignore t :wk "Toggle")
-      "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+  (start/leader-keys
+    "o" '(:ignore t :wk "Combobulate"))
+
+  (start/leader-keys
+    "s" '(:ignore t :wk "Show")
+    "s e" '(eat :wk "Eat terminal"))
+
+  (start/leader-keys
+    "t" '(:ignore t :wk "Toggle")
+    "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+    "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 
 (use-package emacs
   :custom
@@ -119,7 +140,7 @@
   ;;(dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
   (recentf-mode t) ;; Enable recent file mode
 
-  ;;(global-visual-line-mode t)           ;; Enable truncated lines
+  (global-visual-line-mode t)           ;; Enable truncated lines
   ;; (display-line-numbers-type 'relative) ;; Relative line numbers
   (global-display-line-numbers-mode t)  ;; Display line numbers
 
@@ -152,6 +173,11 @@
 
 (fset 'yes-or-no-p 'y-or-n-p) ; accept y/n instead of yes/no in prompts
 
+(use-package mwim
+  :ensure t
+  :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
+         ([remap move-end-of-line] . mwim-end-of-code-or-line)))
+
 (use-package amx
   :ensure t
   :config
@@ -160,11 +186,16 @@
 (setq user-full-name "Hien Huynh-Minh"
       user-mail-address "blackcat22121996@gmail.com")
 
+(use-package avy
+  :ensure t
+  :diminish avy-mode
+  :config (setq avy-all-windows nil))
+
 (use-package gruvbox-theme
   :config
   (load-theme 'gruvbox-dark-medium t)) ;; We need to add t to trust this package
 
-(add-to-list 'default-frame-alist '(alpha-background . 95)) ;; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
 
 (set-face-attribute 'default nil
                     ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
@@ -263,12 +294,12 @@
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
 
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install 'prompt)
+(use-package tree-sitter
+  :ensure t
+  :hook ((prog-mode . tree-sitter-mode)
+         (prog-mode . tree-sitter-hl-mode))
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+  (require 'tree-sitter-langs))
 
 (use-package combobulate
   :custom
@@ -329,9 +360,6 @@
 ;; Enable flycheck globally
 (add-hook 'after-init-hook #'global-flycheck-mode)
 
-(use-package add-node-modules-path
-  :hook (flycheck-mode . add-node-modules-path))
-
 (use-package emmet-mode)
 
 (use-package apheleia
@@ -342,24 +370,49 @@
   apheleia-mode-alist
   :functions
   apheleia-global-mode
+  :hook ((typescript-ts-mode .  apheleia-mode)
+         (javascript-mode . apheleia-mode)
+         (typescript-mode . apheleia-mode))
   :config
   (setf (alist-get 'prettier-json apheleia-formatters)
         '("prettier" "--stdin-filepath" filepath))
-  (apheleia-global-mode +1))
+  ;; (apheleia-global-mode +1)
+  )
+
+(use-package go-mode
+  :ensure t
+  :hook((go-mode . eglot-ensure)))
+
+(use-package go-eldoc
+:ensure t
+:hook (go-mode . go-eldoc-setup))
+
+(defun eglot-format-buffer-before-save ()
+  (add-hook 'before-save-hook #'eglot-format-buffer -10 t))
+
+(defun eglot-organizing-import-before-save ()
+  (add-hook 'before-save-hook
+            (lambda ()
+              (call-interactively 'eglot-code-action-organize-imports))
+            nil t))
+(add-hook 'go-mode-hook #'eglot-format-buffer-before-save) 
+(add-hook 'go-mode-hook #'eglot-organizing-import-before-save)
+
+(setq-default eglot-workspace-configuration
+              '((:gopls .
+                        ((staticcheck . t)
+                         (matcher . "CaseSensitive")))))
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
 
 
 
-;; (use-package copilot
-;;   :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
-;;   :ensure t)
-;; you can utilize :map :hook and :config to customize copilot
+
 
 (defun me/read-openai-key ()
   (with-temp-buffer
-    (insert-file-contents "./key.txt")
+    (insert-file-contents "~/.emacs.d/key.txt")
     (string-trim (buffer-string))))
 
 (use-package gptel
@@ -391,6 +444,20 @@
   (switch-to-buffer "My:AI Chat")
   (delete-other-windows)
 )
+
+
+
+(use-package dumb-jump
+  :ensure t
+  :init 
+  (setq dumb-jump-selector 'ivy)
+  :bind (("M-g o" . dumb-jump-go-other-window)
+         ("M-g j" . dumb-jump-go)
+         ("M-g i" . dumb-jump-go-prompt)
+         ("M-g x" . dumb-jump-go-prefer-external)
+         ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 
 ;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
@@ -510,6 +577,26 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
   )
 
+(use-package diredfl
+  :ensure t
+  :config
+  (setq
+   diredfl-ignore-compressed-flag nil
+   diredfl-number     '(:foreground "#54A248")
+   diredfl-file-name  '(:foreground "White")
+   diredfl-dir-name   '(:foreground "#3DAEE9")
+   diredfl-symlink    '(:foreground "#16A085" :background "#3A3B32")
+   diredfl-date-time  '(:foreground "#1D95EC")
+   diredfl-dir-priv   '(:foreground "#3DAEE9")
+   diredfl-read-priv  '(:foreground "#FDBC4B")
+   diredfl-write-priv '(:foreground "#B0362B")
+   diredfl-exec-priv  '(:foreground "#55A649")
+   diredfl-link-priv  '(:foreground "#16A085")
+   diredfl-compressed-file-suffix  'diredfl-file-suffix
+   diredfl-compressed-file-name  '(:foreground "#C0392B")
+   )
+  :hook (dired-mode . diredfl-mode))
+
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
@@ -611,6 +698,13 @@
 (use-package embark-consult
 :ensure t
 :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package swiper
+  :ensure t
+  :bind
+  (:map global-map
+        ("C-s" . swiper-isearch)
+        ("C-S-s" . swiper-thing-at-point)))
 
 (use-package diminish)
 
@@ -719,6 +813,14 @@
    (lambda ()
      (define-key neotree-mode-map (kbd "TAB") 'custom-neotree-peek))))
 
+(use-package multiple-cursors
+  :ensure t)
+
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
 ;; Increase the amount of data which Emacs reads from the process
@@ -745,13 +847,23 @@
 (setq org-babel-results-keyword "results")
 (setq org-src-fontify-natively t)
 
-(use-package ob-go :after org)
-
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((sql . t)))
+ '((sql . t)
+   ;;(http . t)
+   (restclient . t)
+   (go . t)
+   (rust . t)))
+
+(use-package ob-go :after org)
 
 (use-package ob-rust :after org)
+
+(use-package ob-restclient
+  :ensure t
+  :after org
+  :config
+  (add-to-list 'org-babel-load-languages '(restclient . t)))
 
 (use-package ox-gfm
   :defer t
@@ -790,7 +902,40 @@
 (use-package dslide
   :ensure t)
 
-(use-package master-of-ceremonies
-  :ensure t)
+(use-package org-preview-html
+  :ensure t
+  :after org)
+
+(defun pdf-to-org (pdf-file org-file)
+  "Convert PDF-FILE to ORG-FILE by extracting the text and converting it into org mode."
+  (interactive "fSelect PDF file: \nFSave Org file as: ")
+  (let ((temp-txt-file (make-temp-file "pdf-to-text-" nil ".txt")))
+    ;; Extract text from the PDF using pdftotext command
+    (shell-command (format "pdftotext %s %s" pdf-file temp-txt-file))
+    
+    ;; Read the extracted text
+    (with-temp-buffer
+      (insert-file-contents temp-txt-file)
+      ;; Optionally, add Org headers or other formatting
+      (goto-char (point-min))
+      (insert "#+TITLE: Extracted PDF Content\n\n")
+
+      ;; Write to the Org file
+      (write-region (point-min) (point-max) org-file))
+    (message "PDF content has been written to %s" org-file)))
+
+(setq org-startup-with-inline-images t)
+
+(use-package restclient
+ :ensure t
+ :mode ("\\.http\\'" . restclient-mode))
 
 
+
+(use-package smudge
+  :bind-keymap ("C-c ." . smudge-command-map)
+  :config
+  (setq smudge-oauth2-client-secret "2514e465cfe94158b0e68861d3c22428"
+        smudge-oauth2-client-id "c190941e16e04f588f5485f6d0791d77")
+  ;; (setq smudge-transport 'connect) ;; Premium only
+  )
