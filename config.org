@@ -21,12 +21,15 @@
   - [[#amx][Amx]]
   - [[#personal-information][Personal Information]]
   - [[#avy][Avy]]
+  - [[#whitespace][Whitespace]]
+  - [[#string-inflection][String inflection]]
 - [[#appearance][Appearance]]
   - [[#set-theme][Set Theme]]
   - [[#transparency][Transparency]]
   - [[#fonts][Fonts]]
   - [[#modeline][Modeline]]
   - [[#dashboard][Dashboard]]
+  - [[#nyan-mode][Nyan Mode]]
 - [[#development][Development]]
   - [[#projectile][Projectile]]
   - [[#eglot][Eglot]]
@@ -34,8 +37,7 @@
   - [[#language-modes][Language modes]]
   - [[#terminal][Terminal]]
   - [[#deadgrep][Deadgrep]]
-  - [[#copilot][Copilot]]
-  - [[#gptel][Gptel]]
+  - [[#ai][AI]]
   - [[#indentation-guides][Indentation guides]]
   - [[#dumbjump][Dumbjump]]
 - [[#multi-file-example][Multi File Example]]
@@ -69,8 +71,10 @@
   - [[#table-of-contents][Table of Contents]]
   - [[#org-superstar][Org Superstar]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
+  - [[#mysql-to-org-mode][MySql to org mode]]
   - [[#org-babels][Org Babels]]
   - [[#org-exporter][Org Exporter]]
+  - [[#org-drawing][Org Drawing]]
   - [[#latex-previews-with-org][LaTeX previews with Org]]
   - [[#image-handling-in-the-org-file][Image handling in the Org file]]
   - [[#org-publish][Org Publish]]
@@ -84,14 +88,6 @@
 
 * Introduction
 #+begin_src emacs-lisp
-    ;; Kickstart.emacs is *not* a distribution.
-    ;; It's a template for your own configuration.
-
-    ;; It is *recommeded* to configure it from the *config.org* file.
-    ;; The goal is that you read every line, top-to-bottom, understand
-    ;; what your configuration is doing, and modify it to suit your needs.
-
-    ;; You can delete this when you're done. It's your config now. :)
 #+end_src
 
 * Important to load first
@@ -151,6 +147,25 @@ With Emacs 29 use-package is now built-in.
     :config
     (exec-path-from-shell-initialize))
 #+end_src
+
+#+begin_src emacs-lisp :tangle no
+(use-package emacs-solo-exec-path-from-shell
+  :ensure nil
+  :defer t
+  :init
+  (defun emacs-solo/set-exec-path-from-shell-PATH ()
+    "Set up Emacs' `exec-path' and PATH environment the same as user Shell."
+    (interactive)
+    (let ((path-from-shell
+           (replace-regexp-in-string
+            "[ \t\n]*$" "" (shell-command-to-string
+                            "$SHELL --login -c 'echo $PATH'"))))
+      (setenv "PATH" path-from-shell)
+      (setq exec-path (split-string path-from-shell path-separator))
+      (message ">>> emacs-solo: PATH loaded")))
+
+  (add-hook 'after-init-hook #'emacs-solo/set-exec-path-from-shell-PATH))
+#+end_src
 ** Evil Mode
 An extensible vi/vim layer for Emacs. Because…let’s face it. The Vim keybindings are just plain better.
 Notes:
@@ -160,7 +175,7 @@ Notes:
 If you don't want to use evil-mode don't forget to remove:
 - Messages buffer fix in Good default section (:ghook)
 - And also change general.el keybindings and setup (general-evil-setup, :states, etc.)
-*Note* I don't use evil mode 
+*Note* I don't use evil mode
 #+begin_src emacs-lisp :tangle no
     (use-package evil
       :init ;; Execute code Before a package is loaded
@@ -186,200 +201,211 @@ If you don't want to use evil-mode don't forget to remove:
       (evil-collection-init))
 #+end_src
 
-
-** TODO Meow Mode 
+** TODO Meow Mode
 #+begin_src emacs-lisp :tangle no
-(use-package meow
-  :hook (after-init . meow-global-mode)
-  :demand t
-  :config
-  (setq meow-replace-state-name-list
-		 '((normal . "🟢")
-		   (motion . "🟡")
-		   (keypad . "🟣")
-		   (insert . "🟠")
-		   (beacon . "🔴")))
-  (add-to-list 'meow-mode-state-list '(org-mode . insert))
-  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
-  (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
-  (add-to-list 'meow-mode-state-list '(git-commit-mode . insert))
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-colemak-dh)
-  (meow-motion-overwrite-define-key
-	;; Use e to move up, n to move down.
-	;; Since special modes usually use n to move down, we only overwrite e here.
-	'("e" . meow-prev)
-	'("<escape>" . ignore))
-  (meow-leader-define-key
-	'("?" . meow-cheatsheet)
-	;; To execute the originally e in MOTION state, use SPC e.
-	'("e" . "H-e")
-	'("o" . switch-window)
-	'("1" . meow-digit-argument)
-	'("2" . meow-digit-argument)
-	'("3" . meow-digit-argument)
-	'("4" . meow-digit-argument)
-	'("5" . meow-digit-argument)
-	'("6" . meow-digit-argument)
-	'("7" . meow-digit-argument)
-	'("8" . meow-digit-argument)
-	'("9" . meow-digit-argument)
-	'("0" . meow-digit-argument)
-	'("f ." . find-file-at-point))
-  (meow-normal-define-key
-	'("0" . meow-expand-0)
-	'("1" . meow-expand-1)
-	'("2" . meow-expand-2)
-	'("3" . meow-expand-3)
-	'("4" . meow-expand-4)
-	'("5" . meow-expand-5)
-	'("6" . meow-expand-6)
-	'("7" . meow-expand-7)
-	'("8" . meow-expand-8)
-	'("9" . meow-expand-9)
-	'("-" . negative-argument)
-	'(";" . meow-reverse)
-	'("," . meow-inner-of-thing)
-	'("." . meow-bounds-of-thing)
-	'("[" . meow-beginning-of-thing)
-	'("]" . meow-end-of-thing)
-	'("/" . meow-visit)
-	'("a" . meow-append)
-	'("A" . meow-open-below)
-	'("b" . meow-back-word)
-	'("B" . meow-back-symbol)
-	'("c" . meow-change)
-	'("i" . meow-prev)
-	'("I" . meow-prev-expand)
-	'("f" . meow-find)
-	'("g" . meow-cancel-selection)
-	'("G" . meow-grab)
-	'("n" . meow-left)
-	'("N" . meow-left-expand)
-	'("o" . meow-right)
-	'("O" . meow-right-expand)
-	'("j" . meow-join)
-	'("k" . meow-kill)
-	'("l" . meow-line)
-	'("L" . meow-goto-line)
-	'("m" . meow-mark-word)
-	'("M" . meow-mark-symbol)
-	'("e" . meow-next)
-	'("E" . meow-next-expand)
-	'("h" . meow-block)
-	'("H" . meow-to-block)
-	'("p" . meow-yank)
-	'("q" . meow-quit)
-	'("r" . meow-replace)
-	'("s" . meow-insert)
-	'("S" . meow-open-above)
-	'("t" . meow-till)
-	'("u" . meow-undo)
-	'("U" . meow-undo-in-selection)
-	'("v" . meow-search)
-	'("w" . meow-next-word)
-	'("W" . meow-next-symbol)
-	'("x" . meow-delete)
-	'("X" . meow-backward-delete)
-	'("y" . meow-save)
-	'("z" . meow-pop-selection)
-	'("'" . repeat)
-	'("<escape>" . ignore)))
+  (use-package meow
+    :hook (after-init . meow-global-mode)
+    :demand t
+    :config
+    (setq meow-replace-state-name-list
+          '((normal . "🟢")
+            (motion . "🟡")
+            (keypad . "🟣")
+            (insert . "🟠")
+            (beacon . "🔴")))
+
+    (setq meow-leader-key "C-c") ;; Same with leader key of general
+    (add-to-list 'meow-mode-state-list '(org-mode . insert))
+    (add-to-list 'meow-mode-state-list '(eat-mode . insert))
+    (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
+    (add-to-list 'meow-mode-state-list '(git-commit-mode . insert))
+
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+    (meow-motion-overwrite-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    (meow-leader-define-key
+     ;; SPC j/k will run the original command in MOTION state.
+     '("j" . "H-j")
+     '("k" . "H-k")
+     ;; Use SPC (0-9) for digit arguments.
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet))
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("<escape>" . ignore)))
 #+end_src
 ** General Keybindings
 A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
+
 #+begin_src emacs-lisp
-  (use-package general
-    :init 
-    (general-auto-unbind-keys)
-    :config
-    ;; (general-evil-setup)
-    ;; Set up 'C-c' as the leader key
-    (general-create-definer start/leader-keys
-      :prefix "C-c")           ;; Set leader key
+      (use-package general
+        :init
+        (general-auto-unbind-keys)
+        :config
+        ;; (general-evil-setup)
+        ;; Set up 'C-c' as the leader key
+        (general-create-definer start/leader-keys
+          :prefix "C-c")           ;; Set leader key
 
-    (start/leader-keys
-      "." '(find-file :wk "Find file")
-      "TAB" '(comment-line :wk "Comment lines")
-      "p" '(projectile-command-map :wk "Projectile command map"))
+        (start/leader-keys
+          "." '(find-file :wk "Find file")
+          "TAB" '(comment-line :wk "Comment lines")
+          "p" '(projectile-command-map :wk "Projectile command map"))
 
-    (start/leader-keys
-      "f" '(:ignore t :wk "Find")
-      "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-      "f r" '(consult-recent-file :wk "Recent files")
-      "f f" '(consult-fd :wk "Fd search for files")
-      "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-      "f l" '(consult-line :wk "Find line")
-      "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-    (start/leader-keys
-      "a" '(:ignore t :wk "Avy")
-      "a a" '(avy-goto-char-timer :wk "Go to char")
-      "a i" '(avy-isearch :wk "Isearch")
-      "a w" '(avy-goto-word-1 :wk "Go to word")
-      "a l" '(avy-goto-line :wk "Go to line")
-      "a o" '(avy-goto-org-headline :wk "Go to org headline"))
+        (start/leader-keys
+          "a" '(:ignore t :wk "Avy")
+          "a a" '(avy-goto-char-timer :wk "Go to char")
+          "a i" '(avy-isearch :wk "Isearch")
+          "a w" '(avy-goto-word-1 :wk "Go to word")
+          "a l" '(avy-goto-line :wk "Go to line")
+          "a o" '(avy-goto-org-headline :wk "Go to org headline"))
 
-    (start/leader-keys
-      "b" '(:ignore t :wk "Buffer Bookmarks")
-      "b b" '(consult-buffer :wk "Switch buffer")
-      "b k" '(kill-this-buffer :wk "Kill this buffer")
-      "b i" '(ibuffer :wk "Ibuffer")
-      "b n" '(next-buffer :wk "Next buffer")
-      "b p" '(previous-buffer :wk "Previous buffer")
-      "b r" '(revert-buffer :wk "Reload buffer")
-      "b j" '(consult-bookmark :wk "Bookmark jump"))
+        (start/leader-keys
+          "b" '(:ignore t :wk "Buffer Bookmarks")
+          "b b" '(consult-buffer :wk "Switch buffer")
+          "b k" '(kill-this-buffer :wk "Kill this buffer")
+          "b i" '(ibuffer :wk "Ibuffer")
+          "b n" '(next-buffer :wk "Next buffer")
+          "b p" '(previous-buffer :wk "Previous buffer")
+          "b r" '(revert-buffer :wk "Reload buffer")
+          "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-    (start/leader-keys
-      "c" '(:ignore t :wk "ChatGPT")
-      "c c" '(gptel :wk "Start")
-      "c s" '(gptel-send :wk "Send")
-      "c m" '(gptel-menu :wk "Menu"))
+        (start/leader-keys
+          "c" '(:ignore t :wk "ChatGPT")
+          "c c" '(gptel :wk "Start")
+          "c s" '(gptel-send :wk "Send")
+          "c m" '(gptel-menu :wk "Menu"))
 
-    (start/leader-keys
-      "d" '(:ignore t :wk "Dired")
-      "d v" '(dired :wk "Open dired")
-      "d j" '(dired-jump :wk "Dired jump to current"))
+        (start/leader-keys
+          "d" '(:ignore t :wk "Dired")
+          "d v" '(dired :wk "Open dired")
+          "d j" '(dired-jump :wk "Dired jump to current"))
 
-    (start/leader-keys
-      "e" '(:ignore t :wk "Eglot Evaluate")
-      "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-      "e f" '(eglot-format :wk "Eglot Format")
-      "e l" '(consult-flymake :wk "Consult Flymake")
-      "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-      "e r" '(eval-region :wk "Evaluate elisp in region"))
+        (start/leader-keys
+          "e" '(:ignore t :wk "Eglot Evaluate")
+          "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+          "e f" '(eglot-format :wk "Eglot Format")
+          "e l" '(consult-flymake :wk "Consult Flymake")
+          "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+          "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-    (start/leader-keys
-      "g" '(:ignore t :wk "Git")
-      "g g" '(magit-status :wk "Magit status"))
+        (start/leader-keys
+          "f" '(:ignore t :wk "Find")
+          "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+          "f r" '(consult-recent-file :wk "Recent files")
+          "f f" '(consult-fd :wk "Fd search for files")
+          "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+          "f l" '(consult-line :wk "Find line")
+          "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-    (start/leader-keys
-      "j" '(:ignore t :wk "Dumb Jump")
-      "j g" '(dumb-jump-go :wk "Dumb jump go")
-      "j o" '(dumb-jump-go-other-window :wk "Dumb jump go other window")
-      "j i" '(dumb-jump-go-prompt :wk "Dumb jump go prompt")
-      "j x" '(dumb-jump-go-prefer-external :wk "Dumb jump go prefer external")
-      "j b" '(dumb-jump-back :wk "Dumb jump back"))
+        (start/leader-keys
+          "g" '(:ignore t :wk "Git")
+          "g g" '(magit-status :wk "Magit status"))
 
-    (start/leader-keys
-      "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-      "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-      "h r" '((lambda () (interactive)
-                (load-file "~/emacs.d/init.el"))
-              :wk "Reload Emacs config"))
+        (start/leader-keys
+          "j" '(:ignore t :wk "Dumb Jump")
+          "j g" '(dumb-jump-go :wk "Dumb jump go")
+          "j o" '(dumb-jump-go-other-window :wk "Dumb jump go other window")
+          "j i" '(dumb-jump-go-prompt :wk "Dumb jump go prompt")
+          "j x" '(dumb-jump-go-prefer-external :wk "Dumb jump go prefer external")
+          "j b" '(dumb-jump-back :wk "Dumb jump back"))
 
-    (start/leader-keys
-      "o" '(:ignore t :wk "Combobulate"))
+        (start/leader-keys
+          "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+          "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+          "h r" '((lambda () (interactive)
+                    (load-file "~/emacs.d/init.el"))
+                  :wk "Reload Emacs config"))
 
-    (start/leader-keys
-      "s" '(:ignore t :wk "Show")
-      "s e" '(eat :wk "Eat terminal"))
+        (start/leader-keys
+          "l" '(:ignore t :wk "Ellama")
+          "l m" '(ellama-transient-main-menu :wk "Transient Main Menu"))
 
-    (start/leader-keys
-      "t" '(:ignore t :wk "Toggle")
-      "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+        (start/leader-keys
+          "o" '(:ignore t :wk "Combobulate"))
+
+        (start/leader-keys
+          "s" '(:ignore t :wk "Show")
+          "s e" '(eat :wk "Eat terminal"))
+
+        (start/leader-keys
+          "t" '(:ignore t :wk "Toggle")
+          "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+          "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 #+end_src
 
 ** Good Defaults
@@ -404,9 +430,14 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
     (global-visual-line-mode t)           ;; Enable truncated lines
     ;; (display-line-numbers-type 'relative) ;; Relative line numbers
     (global-display-line-numbers-mode t)  ;; Display line numbers
-
+    ;; Smooth scrolling
+    (scroll-step 1)
+    (scroll-conservatively 100000) ;; Maker distamce from center (don't jump to center)
+    (scroll-preserve-screen-position 1) ;; Try to keep screen position when PgDn/PgUp
+    (scroll-margin 0) ;; Start scrolling when marker and top/bottom
+    (mouse-wheel-scroll-amount '(1)) ;; Mouse scroll moves 1 line at a time, instead of 5 lines.
     (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
-    (scroll-conservatively 10) ;; Smooth scrolling
+
     ;;(scroll-margin 8)
 
     (tab-width 4)
@@ -440,10 +471,11 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
 ** Move Where I Mean
 #+begin_src emacs-lisp
-      (use-package mwim
-        :ensure t
-        :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
-               ([remap move-end-of-line] . mwim-end-of-code-or-line)))
+  (use-package mwim
+    :ensure t
+    :bind (:map prog-mode-map
+                ("C-a" . mwim-beginning-of-code-or-line)
+                ("C-e" . mwim-end-of-code-or-line)))
 #+end_src
 ** Amx
 It provides several enhancement over the ordinary ~execute-extended-command~
@@ -460,25 +492,56 @@ It provides several enhancement over the ordinary ~execute-extended-command~
 #+end_src
 ** Avy
 #+begin_src emacs-lisp
-          (use-package avy
-            :ensure t
-            :diminish avy-mode
-            :config (setq avy-all-windows nil))
+  (use-package avy
+    :ensure t
+    :diminish avy-mode
+    :config (setq avy-all-windows nil))
+#+end_src
+** Whitespace
+#+begin_src emacs-lisp
+  (use-package whitespace
+    :ensure nil
+    :defer t
+    :hook (before-save . whitespace-cleanup)
+    )
+#+end_src
+** String inflection
+underscore -> UPCASE -> CamelCase
+#+begin_src emacs-lisp
+  (use-package string-inflection
+    :ensure t
+    :bind (:map
+           prog-mode-map
+           ("C-M-j" . string-inflection-cycle)))
 #+end_src
 * Appearance
 ** Set Theme
 Set gruvbox theme, if you want some themes try out doom-themes.
 Use consult-theme to easily try out themes (*Epilepsy* Warning).
 #+begin_src emacs-lisp
-    (use-package gruvbox-theme
-      :config
-      (load-theme 'gruvbox-dark-medium t)) ;; We need to add t to trust this package
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; global settings (defaults)
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-material t)
+    ;; (load-theme 'doom-moonlight t)
+    ;; (load-theme 'doom-palenight t)
+    ;; (load-theme 'doom-molokai t) (sublime theme)
+
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custome neotree theme (all-the-icons must be installed)
+    ;; (doom-themes-neotree-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
 #+end_src
 
 ** Transparency
 With Emacs version 29, true transparency has been added.
 #+begin_src emacs-lisp
-    (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+    (add-to-list 'default-frame-alist '(alpha-background . 100)) ;; For all new frames henceforth
 #+end_src
 
 ** Fonts
@@ -519,7 +582,7 @@ Replace the default modeline with a prettier more useful.
       (doom-modeline-persp-icon t)) ;; Adds folder icon next to persp name
 #+end_src
 
-** Dashboard 
+** Dashboard
 An extensible emacs startup screen
 #+begin_src emacs-lisp
     (use-package nerd-icons
@@ -532,7 +595,7 @@ An extensible emacs startup screen
       :config
       (dashboard-setup-startup-hook)
       :init
-      (setq 
+      (setq
        dashboard-startup-banner (concat user-emacs-directory "assets/emacs_banner.png")
        dashboard-banner-logo-title nil ; The text below the logo
        dashboard-set-heading-icons t
@@ -564,19 +627,29 @@ An extensible emacs startup screen
        )
       )
 #+end_src
+
+** Nyan Mode
+#+begin_src emacs-lisp
+  (use-package nyan-mode
+    :ensure t
+    :defer 20
+    :if (display-graphic-p)
+    :config
+    (nyan-mode +1))
+#+end_src
 * Development
 ** Projectile
 Project interaction library for Emacs.
 #+begin_src emacs-lisp
   (use-package projectile
-	:init
-	(projectile-mode)
-	:custom
-	(projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-	(projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-	(projectile-generic-command "fd . -0 --type f --color=never")     
-	(projectile-project-search-path '("~/projects/"))) ;; . 1 means only search the first subdirectory level for projects
-	;; Use Bookmarks for smaller, not standard projects
+    :init
+    (projectile-mode)
+    :custom
+    (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+    (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+    (projectile-generic-command "fd . -0 --type f --color=never")
+    (projectile-project-search-path '("~/projects/"))) ;; . 1 means only search the first subdirectory level for projects
+    ;; Use Bookmarks for smaller, not standard projects
 #+end_src
 
 ** Eglot
@@ -664,7 +737,7 @@ Use SPC-tab to uncomment the lines.
 #     (use-package lua-mode
 #       :mode "\\.lua\\'") ;; Only start in a lua file
 # #+end_src
-*** Ruby mode 
+*** Ruby mode
 Setup ruby mode
 #+begin_src emacs-lisp
     (use-package ruby-ts-mode
@@ -677,7 +750,7 @@ Setup ruby mode
       :custom
       (ruby-indent-level 2)
       (ruby-indent-tabs-mode nil))
-    
+
 #+end_src
 **** Inf-ruby
 #+begin_src emacs-lisp
@@ -745,7 +818,7 @@ Enable eslint checker when web-mode is activated:
 ***** Use a local eslint from node_modules
 To use ~eslint~ and a config from a project's local node_modules, use the following:
 #+begin_src emacs-lisp :tangle no
-    (use-package add-node-modules-path 
+    (use-package add-node-modules-path
       :hook (flycheck-mode . add-node-modules-path))
 #+end_src
 **** Emmet Mode
@@ -797,7 +870,7 @@ To use ~eslint~ and a config from a project's local node_modules, use the follow
               (lambda ()
                 (call-interactively 'eglot-code-action-organize-imports))
               nil t))
-  (add-hook 'go-mode-hook #'eglot-format-buffer-before-save) 
+  (add-hook 'go-mode-hook #'eglot-format-buffer-before-save)
   (add-hook 'go-mode-hook #'eglot-organizing-import-before-save)
 #+end_src
 **** Configuring gopls via Eglot
@@ -807,7 +880,20 @@ To use ~eslint~ and a config from a project's local node_modules, use the follow
                           ((staticcheck . t)
                            (matcher . "CaseSensitive")))))
 #+end_src
+**** Go lint
+#+begin_src bash
+  go get -u github.com/golang/lint/golint
+#+end_src
 
+#+begin_src emacs-lisp
+  (use-package golint
+    :ensure t)
+#+end_src
+**** Go doctor
+#+begin_src emacs-lisp
+  (use-package godoctor
+    :ensure t)
+#+end_src
 ** Terminal
 *** Eat
 Eat(Emulate A Terminal) is a terminal emulator within Emacs.
@@ -821,23 +907,31 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
 #+begin_src emacs-lisp
 
 #+end_src
-** Copilot
+** AI
+*** Gptel
 #+begin_src emacs-lisp
+      (defun me/read-openai-key ()
+        (with-temp-buffer
+          (insert-file-contents "~/.emacs.d/key.txt")
+          (string-trim (buffer-string))))
 
+      (use-package gptel
+        :config
+        (setq gptel-playback t)
+        (setq gptel-api-key #'me/read-openai-key)
+        (setq gptel-default-mode 'org-mode)
+        (setq gptel-model "gpt-4o-mini")
+        :hook
+        ((gptel-post-stream . gptel-auto-scroll) ;; window scroll automatically
+               )
+        )
 #+end_src
-** Gptel
+*** Elysium
 #+begin_src emacs-lisp
-  (defun me/read-openai-key ()
-    (with-temp-buffer
-      (insert-file-contents "~/.emacs.d/key.txt")
-      (string-trim (buffer-string))))
-
-  (use-package gptel
-    :config
-    (setq gptel-playback t)
-    (setq gptel-api-key #'me/read-openai-key)
-    (setq gptel-default-mode 'org-mode)
-    (setq gptel-model "gpt-4o-mini"))
+    (use-package elysium
+      :custom
+      (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+      (elysium-window-style 'vertical)) ; Can be customized to horizontal
 #+end_src
 *** Custome function call gptel
 #+begin_src emacs-lisp
@@ -874,7 +968,7 @@ It is very useful to see the indentation guides in programming modes.
 #+begin_src emacs-lisp
     (use-package dumb-jump
       :ensure t
-      :init 
+      :init
       (setq dumb-jump-selector 'ivy)
       :bind (("M-g o" . dumb-jump-go-other-window)
              ("M-g j" . dumb-jump-go)
@@ -1006,6 +1100,13 @@ This package displays keyword entries from source code comments and Org files in
     (use-package magit-todos
       :after (magit)
       :config (magit-todos-mode 1))
+#+end_src
+
+*** Smerge mode
+#+begin_src emacs-lisp
+    (use-package smerge-mode
+      :ensure nil
+      :hook (prog-mode . smerge-mode))
 #+end_src
 ** Corfu
 Enhances in-buffer completion with a small completion popup.
@@ -1266,7 +1367,7 @@ Which-key is a helper utility for keychords (which key to press).
 #+end_src
 
 ** Ace Window
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
     (use-package ace-window
       :ensure t
       :config
@@ -1299,7 +1400,7 @@ Emacs looks like a tilling window manager, but why not use it like a dynamic win
 :ensure t
 :bind
 (:map global-map
-("C-x C-l" . 'rotate-layout)) 
+("C-x C-l" . 'rotate-layout))
 )
 #+end_src
 ** PDF Tools
@@ -1333,18 +1434,18 @@ Emacs looks like a tilling window manager, but why not use it like a dynamic win
             (neotree-find file-name))
         (neotree-find)))
     (neo-global--select-window))
-  
+
   (defun neotree-project-tree-toggle ()
     (interactive)
     (if (neo-global--window-exists-p)
         (neotree-hide)
       (neotree-project-tree-open)))
-  
+
   (global-set-key [f8] 'neotree-project-tree-toggle)
-  
+
   (setq neo-theme 'arrow)
   (setq neo-window-width 35)
-  
+
   ;; https://github.com/jaypei/emacs-neotree/issues/77 + https://github.com/hemmvm/dotemacs/blob/master/site-lisp/util--neotree.el
   (defun custom-neotree-enter-hide ()
     (interactive)
@@ -1353,19 +1454,19 @@ Emacs looks like a tilling window manager, but why not use it like a dynamic win
       (if (not (and current (file-accessible-directory-p current)))
           (neotree-hide)))
     )
-  
+
   (defun custom-neotree-peek ()
     (interactive)
     (let ((neo-window (neo-global--get-window)))
       (neotree-enter)
       (select-window neo-window))
     )
-  
+
   (add-hook
    'neotree-mode-hook
    (lambda ()
      (define-key neotree-mode-map (kbd "RET") 'custom-neotree-enter-hide)))
-  
+
   (add-hook
    'neotree-mode-hook
    (lambda ()
@@ -1394,11 +1495,12 @@ We also increase Read Process Output Max so emacs can read more data.
 * Org Mode
 Org mode is one of the things that emacs is loved for.
 #+begin_src emacs-lisp
-    (use-package org
-      :ensure nil
-      :hook
-      (org-mode . org-indent-mode)
-      )
+  (use-package org
+    :ensure nil
+    :hook
+    ((org-mode . org-indent-mode)
+    (org-babel-after-execute . org-redisplay-inline-images))
+    )
 #+end_src
 ** Table of Contents
 #+begin_src emacs-lisp
@@ -1423,6 +1525,14 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
       :after org)
 #+end_src
 
+** MySql to org mode
+#+begin_src emacs-lisp
+  (use-package mysql-to-org
+    :ensure t
+    :after org
+    :config
+    (setq mysql-to-org-mysql-user "hienhm"))
+#+end_src
 ** Org Babels
 
 #+begin_src emacs-lisp
@@ -1440,11 +1550,12 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
      (rust . t)))
 #+end_src
 
+#+results:
+
 *** Golang
 #+begin_src emacs-lisp
     (use-package ob-go :after org)
 #+end_src
-
 
 *** Rust
 #+begin_src emacs-lisp
@@ -1465,6 +1576,16 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
   :config
   (add-to-list 'org-babel-load-languages '(restclient . t)))
 #+end_src
+
+*** Verb
+#+begin_src emacs-lisp
+  (use-package verb
+    :ensure t
+    :after org
+    :config
+    (define-key org-mode-map (kbd "C-c C-r") verb-command-map)
+    (add-to-list 'org-babel-load-languages '(verb . t)))
+#+end_src
 ** Org Exporter
 #+begin_src emacs-lisp
         (use-package ox-gfm
@@ -1472,9 +1593,33 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
           :ensure t
           :config (ox-gfm :type git :host github :repo "larstvei/ox-gfm"))
 #+end_src
+** Org Drawing
+*** Plantuml
+#+begin_src emacs-lisp
+  (use-package plantuml-mode
+    :ensure ;TODO:
+    :config
+    (setq org-plantuml-executable-path "/usr/local/share/plantuml/plantuml.jar"))
 
-
-
+  (use-package org
+    :init
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((plantuml . t)))
+    :custom
+    ;; PlantUML was too old on Debian Bookworm, so a recent copy is
+    ;; installed in /usr/local/share
+    (org-plantuml-jar-path "/usr/local/share/plantuml/plantuml.jar")
+    ;; Do not ask before evaluating a code block
+    (org-confirm-babel-evaluate nil)
+    ;; Fix for including SVGs
+    (org-latex-pdf-process
+     '("%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+   "bibtex %b"
+   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"
+   "%latex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+    )
+#+end_src
 ** LaTeX previews with Org
 #+begin_src emacs-lisp
     (use-package org-fragtog
@@ -1519,13 +1664,76 @@ One consistent headache with Org image handling is that it does not resize image
 #+begin_src emacs-lisp
   (use-package dslide
     :ensure t)
+
+  (keymap-set org-mode-map "<f5>" #'dslide-deck-start)
 #+end_src
 *** Master of Ceremonies
 #+begin_src emacs-lisp :tangle no
-  (use-package master-of-ceremonies
+  (use-package moc
     :ensure t)
 #+end_src
+*** org-present
+#+begin_src emacs-lisp
+  (use-package visual-fill-column
+    :ensure t
+    :after org
+    :config
+    (setq visual-fill-column-width 110
+          visual-fill-column-center-text t))
 
+  (use-package org-present
+    :ensure t
+    :after org)
+  (defun my/org-present-prepare-slide (buffer-name heading)
+    ;; Show only top-level headlines
+    (org-overview)
+    ;; Unfold the current entry
+    (org-fold-show-entry)
+    ;; Show only direct subheadings of the slide but don't expand them
+    (org-fold-show-children))
+
+  (defun my/org-present-start ()
+    ;; Tweak font sizes
+    (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                       (header-line (:height 4.0) variable-pitch)
+                                       (org-document-title (:height 1.75) org-document-title)
+                                       (org-code (:height 1.55) org-code)
+                                       (org-verbatim (:height 1.55) org-verbatim)
+                                       (org-block (:height 1.25) org-block)
+                                       (org-block-begin-line (:height 0.7) org-block)))
+
+    ;; Set a blank header line string to create blank space at the top
+    (setq header-line-format " ")
+
+    ;; Display inline images automatically
+    (org-display-inline-images)
+
+    ;; Center the presentation and wrap lines
+    (visual-fill-column-mode 1)
+    (visual-line-mode 1))
+
+  (defun my/org-present-end ()
+    ;; Reset font customizations
+    (setq-local face-remapping-alist '((default variable-pitch default)))
+
+    ;; Clear the header line string so that it isn't displayed
+    (setq header-line-format nil)
+
+    ;; Stop displaying inline images
+    (org-remove-inline-images)
+
+    ;; Stop centering the document
+    (visual-fill-column-mode 0)
+    (visual-line-mode 0))
+
+  ;; Turn on variable pitch fonts in Org Mode buffers
+  ;; (add-hook 'org-mode-hook 'variable-pitch-mode)
+
+  ;; Register hooks with org-present
+  (add-hook 'org-present-mode-hook 'my/org-present-start)
+  (add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+  (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+#+end_src
 ** Org Preview HTML
 #+begin_src emacs-lisp
     (use-package org-preview-html
@@ -1543,7 +1751,7 @@ One consistent headache with Org image handling is that it does not resize image
   (let ((temp-txt-file (make-temp-file "pdf-to-text-" nil ".txt")))
     ;; Extract text from the PDF using pdftotext command
     (shell-command (format "pdftotext %s %s" pdf-file temp-txt-file))
-    
+
     ;; Read the extracted text
     (with-temp-buffer
       (insert-file-contents temp-txt-file)
