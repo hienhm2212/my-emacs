@@ -49,6 +49,7 @@
   - [[#git][Git]]
   - [[#corfu][Corfu]]
   - [[#cape][Cape]]
+  - [[#dired-subtree][Dired Subtree]]
   - [[#diredfl][Diredfl]]
   - [[#orderless][Orderless]]
   - [[#vertico-and-marginalia][Vertico and Marginalia]]
@@ -85,6 +86,7 @@
   - [[#restclient][Restclient]]
 - [[#weather-tools][Weather Tools]]
 - [[#music][Music]]
+- [[#youtube][Youtube]]
 
 * Introduction
 #+begin_src emacs-lisp
@@ -202,7 +204,7 @@ If you don't want to use evil-mode don't forget to remove:
 #+end_src
 
 ** TODO Meow Mode
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (use-package meow
     :hook (after-init . meow-global-mode)
     :demand t
@@ -221,14 +223,16 @@ If you don't want to use evil-mode don't forget to remove:
     (add-to-list 'meow-mode-state-list '(git-commit-mode . insert))
 
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+    ;; Orverride keys in motion state
     (meow-motion-overwrite-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
      '("<escape>" . ignore))
+    ;; Define leader keys in meow
     (meow-leader-define-key
      ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
+     ;;'("j" . "H-j")
+     ;;'("k" . "H-k")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -311,101 +315,102 @@ The Leader key is what you will press when you want to access your keybindings (
 To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC to replace n to skip).
 
 #+begin_src emacs-lisp
-      (use-package general
-        :init
-        (general-auto-unbind-keys)
-        :config
-        ;; (general-evil-setup)
-        ;; Set up 'C-c' as the leader key
-        (general-create-definer start/leader-keys
-          :prefix "C-c")           ;; Set leader key
+        (use-package general
+          :init
+          (general-auto-unbind-keys)
+          :config
+          ;; (general-evil-setup)
+          ;; Set up 'C-c' as the leader key
+          (general-create-definer start/leader-keys
+            :prefix "C-c")           ;; Set leader key
 
-        (start/leader-keys
-          "." '(find-file :wk "Find file")
-          "TAB" '(comment-line :wk "Comment lines")
-          "p" '(projectile-command-map :wk "Projectile command map"))
+          (start/leader-keys
+            "." '(find-file :wk "Find file")
+            "TAB" '(comment-line :wk "Comment lines")
+            "p" '(projectile-command-map :wk "Projectile command map"))
 
 
-        (start/leader-keys
-          "a" '(:ignore t :wk "Avy")
-          "a a" '(avy-goto-char-timer :wk "Go to char")
-          "a i" '(avy-isearch :wk "Isearch")
-          "a w" '(avy-goto-word-1 :wk "Go to word")
-          "a l" '(avy-goto-line :wk "Go to line")
-          "a o" '(avy-goto-org-headline :wk "Go to org headline"))
+          (start/leader-keys
+            "a" '(:ignore t :wk "Avy")
+            "a a" '(avy-goto-char-timer :wk "Go to char")
+            "a i" '(avy-isearch :wk "Isearch")
+            "a w" '(avy-goto-word-1 :wk "Go to word")
+            "a l" '(avy-goto-line :wk "Go to line")
+            "a o" '(avy-goto-org-headline :wk "Go to org headline"))
 
-        (start/leader-keys
-          "b" '(:ignore t :wk "Buffer Bookmarks")
-          "b b" '(consult-buffer :wk "Switch buffer")
-          "b k" '(kill-this-buffer :wk "Kill this buffer")
-          "b i" '(ibuffer :wk "Ibuffer")
-          "b n" '(next-buffer :wk "Next buffer")
-          "b p" '(previous-buffer :wk "Previous buffer")
-          "b r" '(revert-buffer :wk "Reload buffer")
-          "b j" '(consult-bookmark :wk "Bookmark jump"))
+          (start/leader-keys
+            "b" '(:ignore t :wk "Buffer Bookmarks")
+            "b b" '(consult-buffer :wk "Switch buffer")
+            "b k" '(kill-this-buffer :wk "Kill this buffer")
+            "b i" '(ibuffer :wk "Ibuffer")
+            "b n" '(next-buffer :wk "Next buffer")
+            "b p" '(previous-buffer :wk "Previous buffer")
+            "b r" '(revert-buffer :wk "Reload buffer")
+            "b j" '(consult-bookmark :wk "Bookmark jump"))
 
-        (start/leader-keys
-          "c" '(:ignore t :wk "ChatGPT")
-          "c c" '(gptel :wk "Start")
-          "c s" '(gptel-send :wk "Send")
-          "c m" '(gptel-menu :wk "Menu"))
+          (start/leader-keys
+            "c" '(:ignore t :wk "ChatGPT")
+            "c c" '(gptel :wk "Start")
+            "c s" '(gptel-send :wk "Send")
+            "c m" '(gptel-menu :wk "Menu")
+            "c a" '(gptel-manual-complete :wk "Auto complete"))
 
-        (start/leader-keys
-          "d" '(:ignore t :wk "Dired")
-          "d v" '(dired :wk "Open dired")
-          "d j" '(dired-jump :wk "Dired jump to current"))
+          (start/leader-keys
+            "d" '(:ignore t :wk "Dired")
+            "d v" '(dired :wk "Open dired")
+            "d j" '(dired-jump :wk "Dired jump to current"))
 
-        (start/leader-keys
-          "e" '(:ignore t :wk "Eglot Evaluate")
-          "e e" '(eglot-reconnect :wk "Eglot Reconnect")
-          "e f" '(eglot-format :wk "Eglot Format")
-          "e l" '(consult-flymake :wk "Consult Flymake")
-          "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-          "e r" '(eval-region :wk "Evaluate elisp in region"))
+          (start/leader-keys
+            "e" '(:ignore t :wk "Eglot Evaluate")
+            "e e" '(eglot-reconnect :wk "Eglot Reconnect")
+            "e f" '(eglot-format :wk "Eglot Format")
+            "e l" '(consult-flymake :wk "Consult Flymake")
+            "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+            "e r" '(eval-region :wk "Evaluate elisp in region"))
 
-        (start/leader-keys
-          "f" '(:ignore t :wk "Find")
-          "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
-          "f r" '(consult-recent-file :wk "Recent files")
-          "f f" '(consult-fd :wk "Fd search for files")
-          "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-          "f l" '(consult-line :wk "Find line")
-          "f i" '(consult-imenu :wk "Imenu buffer locations"))
+          (start/leader-keys
+            "f" '(:ignore t :wk "Find")
+            "f c" '((lambda () (interactive) (find-file "~/.emacs.d/config.org")) :wk "Edit emacs config")
+            "f r" '(consult-recent-file :wk "Recent files")
+            "f f" '(consult-fd :wk "Fd search for files")
+            "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+            "f l" '(consult-line :wk "Find line")
+            "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
-        (start/leader-keys
-          "g" '(:ignore t :wk "Git")
-          "g g" '(magit-status :wk "Magit status"))
+          (start/leader-keys
+            "g" '(:ignore t :wk "Git")
+            "g g" '(magit-status :wk "Magit status"))
 
-        (start/leader-keys
-          "j" '(:ignore t :wk "Dumb Jump")
-          "j g" '(dumb-jump-go :wk "Dumb jump go")
-          "j o" '(dumb-jump-go-other-window :wk "Dumb jump go other window")
-          "j i" '(dumb-jump-go-prompt :wk "Dumb jump go prompt")
-          "j x" '(dumb-jump-go-prefer-external :wk "Dumb jump go prefer external")
-          "j b" '(dumb-jump-back :wk "Dumb jump back"))
+          (start/leader-keys
+            "j" '(:ignore t :wk "Dumb Jump")
+            "j g" '(dumb-jump-go :wk "Dumb jump go")
+            "j o" '(dumb-jump-go-other-window :wk "Dumb jump go other window")
+            "j i" '(dumb-jump-go-prompt :wk "Dumb jump go prompt")
+            "j x" '(dumb-jump-go-prefer-external :wk "Dumb jump go prefer external")
+            "j b" '(dumb-jump-back :wk "Dumb jump back"))
 
-        (start/leader-keys
-          "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
-          "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-          "h r" '((lambda () (interactive)
-                    (load-file "~/emacs.d/init.el"))
-                  :wk "Reload Emacs config"))
+          (start/leader-keys
+            "h" '(:ignore t :wk "Help") ;; To get more help use C-h commands (describe variable, function, etc.)
+            "h q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+            "h r" '((lambda () (interactive)
+                      (load-file "~/emacs.d/init.el"))
+                    :wk "Reload Emacs config"))
 
-        (start/leader-keys
-          "l" '(:ignore t :wk "Ellama")
-          "l m" '(ellama-transient-main-menu :wk "Transient Main Menu"))
+          (start/leader-keys
+            "l" '(:ignore t :wk "Ellama")
+            "l m" '(ellama-transient-main-menu :wk "Transient Main Menu"))
 
-        (start/leader-keys
-          "o" '(:ignore t :wk "Combobulate"))
+          (start/leader-keys
+            "o" '(:ignore t :wk "Combobulate"))
 
-        (start/leader-keys
-          "s" '(:ignore t :wk "Show")
-          "s e" '(eat :wk "Eat terminal"))
+          (start/leader-keys
+            "s" '(:ignore t :wk "Show")
+            "s e" '(eat :wk "Eat terminal"))
 
-        (start/leader-keys
-          "t" '(:ignore t :wk "Toggle")
-          "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-          "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+          (start/leader-keys
+            "t" '(:ignore t :wk "Toggle")
+            "t t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+            "t l" '(display-line-numbers-mode :wk "Toggle line numbers")))
 #+end_src
 
 ** Good Defaults
@@ -702,21 +707,23 @@ If you want to use TreeSitter, check out this [[https://www.masteringemacs.org/a
 Currently it's tedious to use Treesitter, because emacs has not yet fully migrated to it.
 *** Treesitter auto
 #+begin_src emacs-lisp :tangle no
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+  (use-package treesit-auto
+    :custom
+    (treesit-auto-install 'prompt)
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (setq treesit-auto-langs '(go ruby rust))
+    (global-treesit-auto-mode)
+  )
 #+end_src
 *** Treesit
-#+begin_src emacs-lisp
-          (use-package tree-sitter
-            :ensure t
-            :hook ((prog-mode . tree-sitter-mode)
-                   (prog-mode . tree-sitter-hl-mode))
-            :config
-            (require 'tree-sitter-langs))
+#+begin_src emacs-lisp :tangle no
+  (use-package tree-sitter
+    :ensure t
+    :hook ((prog-mode . tree-sitter-mode)
+           (prog-mode . tree-sitter-hl-mode))
+    :config
+    (require 'tree-sitter-langs))
 #+end_src
 *** Combobulate
 #+begin_src emacs-lisp
@@ -740,16 +747,17 @@ Use SPC-tab to uncomment the lines.
 *** Ruby mode
 Setup ruby mode
 #+begin_src emacs-lisp
-    (use-package ruby-ts-mode
-      :mode "\\.rb\\'"
-      :mode "Rakefile\\'"
-      :mode "Gemfile\\'"
-      :bind (:map ruby-ts-mode-map
-                  ("C-c r b" . 'treesit-beginning-of-defun)
-                  ("C-c r e" . 'treesit-end-of-defun))
-      :custom
-      (ruby-indent-level 2)
-      (ruby-indent-tabs-mode nil))
+  (use-package ruby-ts-mode
+    :mode "\\.rb\\'"
+    :mode "Rakefile\\'"
+    :mode "Gemfile\\'"
+    :mode "\\.rake\\'"
+    :bind (:map ruby-ts-mode-map
+                ("C-c r b" . 'treesit-beginning-of-defun)
+                ("C-c r e" . 'treesit-end-of-defun))
+    :custom
+    (ruby-indent-level 2)
+    (ruby-indent-tabs-mode nil))
 
 #+end_src
 **** Inf-ruby
@@ -825,7 +833,15 @@ To use ~eslint~ and a config from a project's local node_modules, use the follow
 #+begin_src emacs-lisp
 (use-package emmet-mode)
 #+end_src
-
+*** Rust
+#+begin_src emacs-lisp
+    (use-package rust-ts-mode
+      :mode ("\\.rs" . rust-ts-mode)
+      :hook (rust-ts-mode . eglot-ensure)
+      (rust-ts-mode . company-mode)
+      :config
+      (add-to-list 'eglot-server-programs '(rust-ts-mode . ("rust-analyzer"))))
+#+end_src
 *** Formatting buffers with prettier
 #+begin_src emacs-lisp
   (use-package apheleia
@@ -894,6 +910,26 @@ To use ~eslint~ and a config from a project's local node_modules, use the follow
   (use-package godoctor
     :ensure t)
 #+end_src
+*** Dotenv
+#+begin_src emacs-lisp
+  (use-package dotenv-mode
+    :defer t
+    :ensure t)
+#+end_src
+*** YAML
+#+begin_src emacs-lisp
+    (use-package yaml-mode
+      :defer t
+      :ensure t
+      :mode
+      ("\\.yaml\\'" "\\.yml\\'"))
+#+end_src
+*** Zig
+#+begin_src emacs-lisp
+      (use-package zig-mode
+        :defer t
+        :ensure t)
+#+end_src
 ** Terminal
 *** Eat
 Eat(Emulate A Terminal) is a terminal emulator within Emacs.
@@ -910,21 +946,25 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
 ** AI
 *** Gptel
 #+begin_src emacs-lisp
-      (defun me/read-openai-key ()
-        (with-temp-buffer
-          (insert-file-contents "~/.emacs.d/key.txt")
-          (string-trim (buffer-string))))
+  (defun me/read-openai-key ()
+    (with-temp-buffer
+      (insert-file-contents "~/.emacs.d/key.txt")
+      (string-trim (buffer-string))))
 
-      (use-package gptel
-        :config
-        (setq gptel-playback t)
-        (setq gptel-api-key #'me/read-openai-key)
-        (setq gptel-default-mode 'org-mode)
-        (setq gptel-model "gpt-4o-mini")
-        :hook
-        ((gptel-post-stream . gptel-auto-scroll) ;; window scroll automatically
-               )
-        )
+  (use-package gptel
+    :config
+    (setq gptel-stream t)
+    (setq gptel-api-key #'me/read-openai-key)
+    (setq gptel-default-mode 'org-mode)
+    (setq gptel-model "gpt-4o-mini")
+    :hook
+    ((gptel-post-stream . gptel-auto-scroll) ;; window scroll automatically
+           )
+    )
+
+  ;; gptel manual complete
+  (add-to-list 'load-path (expand-file-name "~/.emacs.d/lisps/gptel-manual-complete"))
+  (autoload #'gptel-manual-complete "gptel-manual-complete" t)
 #+end_src
 *** Elysium
 #+begin_src emacs-lisp
@@ -958,6 +998,27 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
   (delete-other-windows)
 )
 
+#+end_src
+*** Tabby
+**** Install Tabby
+Go to [[https://github.com/TabbyML/tabby/releases][Tabby release page]]
+Download the release
+Find the Linux executable file:
+- Unzip downloaded file. The ~tabby~ executable will be in a subdirectory of dist.
+- Change to this subdirectory or relocate ~tabby~ to a folder of your choice.
+- Make it executatble: ~chmod +x tabby llama-server~
+Run following command
+#+begin_src bash
+  # For CPU-only environment
+  ./tabby serve --model StarCoder-1B --chat-model Qwen2-1.5B-Instruct
+#+end_src
+
+**** Tabby Mode
+#+begin_src emacs-lisp
+  (use-package tabby-mode
+    :ensure t
+    :config
+    (setq tabby-api-url "http://0.0.0.0:8080"))
 #+end_src
 ** Indentation guides
 It is very useful to see the indentation guides in programming modes.
@@ -1013,14 +1074,20 @@ Don't forget to use nerd-icons-install-fonts.
 We use Nerd icons because it has more, better icons and all-the-icons only supports GUI.
 While nerd-icons supports both GUI and TUI.
 #+begin_src emacs-lisp
-    (use-package nerd-icons
-      :if (display-graphic-p))
+  (use-package nerd-icons
+    :if (display-graphic-p))
 
-    (use-package nerd-icons-dired
-      :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
+  (use-package nerd-icons-corfu
+    :ensure t
+    :after corfu
+    :config
+    (add-hook 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-    (use-package nerd-icons-ibuffer
-      :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+  (use-package nerd-icons-dired
+    :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
+
+  (use-package nerd-icons-ibuffer
+    :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 #+end_src
 
 ** Git
@@ -1140,10 +1207,6 @@ Notes:
       ;; `global-corfu-modes' to exclude certain modes.
       :init
       (global-corfu-mode))
-
-    (use-package nerd-icons-corfu
-      :after corfu
-      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 
 ** Cape
@@ -1178,6 +1241,20 @@ Read the [[https://github.com/minad/cape#configuration][configuration section]] 
       )
 #+end_src
 
+** Dired Subtree
+#+begin_src emacs-lisp
+  (use-package dired-subtree
+    :ensure t
+    :after dired-re-dir
+    :bind
+    ( :map dired-mode-map
+      ("<tab>" . dired-subtree-toggle)
+      ("TAB" . dired-subtree-toggle)
+      ("<backtab>" . dired-subtree-remove)
+      ("S-TAB" . dired-subtree-remove))
+    :config
+    (setq dired-subtree-use-backgrounds nil))
+#+end_src
 ** Diredfl
 #+begin_src emacs-lisp
   (use-package diredfl
@@ -1546,15 +1623,18 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
    '((sql . t)
      ;;(http . t)
      (restclient . t)
+     (js . t)
      (go . t)
      (rust . t)))
 #+end_src
-
-#+results:
+*** Yaml
+#+begin_src emacs-lisp :tangle no
+  (use-package ob-yaml :after org)
+#+end_src
 
 *** Golang
 #+begin_src emacs-lisp
-    (use-package ob-go :after org)
+  (use-package ob-go :after org)
 #+end_src
 
 *** Rust
@@ -1656,7 +1736,7 @@ One consistent headache with Org image handling is that it does not resize image
 
 ** Org Publish
 #+begin_src emacs-lisp
-    (require 'ox-publish)
+  (require 'ox-publish)
 #+end_src
 
 ** Org Presentation
@@ -1668,7 +1748,7 @@ One consistent headache with Org image handling is that it does not resize image
   (keymap-set org-mode-map "<f5>" #'dslide-deck-start)
 #+end_src
 *** Master of Ceremonies
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (use-package moc
     :ensure t)
 #+end_src
@@ -1788,4 +1868,23 @@ Show inline images by default
           smudge-oauth2-client-id "c190941e16e04f588f5485f6d0791d77")
     ;; (setq smudge-transport 'connect) ;; Premium only
     )
+#+end_src
+* Youtube
+#+begin_src emacs-lisp
+  (use-package yeetube
+    :ensure t
+    :defer t
+    :init (define-prefix-command 'my/yeetube-map)
+    :config
+    ;; (setf yeetube-mpv-disable-video t) ;; Disable video output
+    (setf yeetube-player #'emms-play-url)
+    :bind (("C-c y" . 'my/yeetube-map)
+            :map my/yeetube-map
+            ("s" . 'yeetube-search)
+            ("b" . 'yeetube-play-saved-video)
+            ("d" . 'yeetube-download-videos)
+            ("p" . 'yeetube-mpv-toggle-pause)
+            ("v" . 'yeetube-mpv-toggle-video)
+            ("V" . 'yeetube-mpv-toggle-no-video-flag)
+            ("k" . 'yeetube-remove-saved-video)))
 #+end_src
