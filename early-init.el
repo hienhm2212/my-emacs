@@ -1,64 +1,44 @@
-;;; early-init.el --- Little Fox Emacs -*- lexical-binding: t; -*-
-;;; Package
-(require 'package)
+;;; early-init.el --- Emacs-Solo (no external packages) Configuration  -*- lexical-binding: t; -*-
+;;
+;;; Commentary:
+;; Early init configuration for Emacs-Solo
+;;
+;;; Code:
 
-(when (version< emacs-version "28")
-  (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/")))
-(add-to-list 'package-archives '("stable" . "https://stable.melpa.org/packages/"))
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+;; Startup hacks
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6
+      vc-handled-backends '(Git))
 
-(customize-set-variable 'package-archive-priorities
-			'(("gnu" . 99)
-			  ("nongnu" . 80)
-			  ("stable" . 70)
-			  ("melpa" . 0)))
+;; Hack to avoid being flashbanged
+(defun emacs-solo/avoid-initial-flash-of-light ()
+  "Avoid flash of light when starting Emacs."
+  (setq mode-line-format nil)
+  ;; These colors should match your selected theme for maximum effect
+  ;; Note that for catppuccin whenever we create a new frame or open it on terminal
+  ;; it is necessary to reload the theme.
+  (set-face-attribute 'default nil :background "#292D3E" :foreground "#292D3E"))
 
-(require 'time-date)
+;; (emacs-solo/avoid-initial-flash-of-light)
 
-(defvar my-package-perform-stale-archive-check t
-  "Check if any package archives are stale.
+;; Better Window Management handling
+(setq frame-resize-pixelwise t
+      frame-inhibit-implied-resize t
+      frame-title-format '("Little Fox Emacs"))
 
-Set this value in your `early-init.el' file.")
+(setq inhibit-compacting-font-caches t)
 
-(defvar my-package-update-days 1
-  "Number of days before an archive will be considered stale.
+;; Disables unused UI Elements
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(tooltip-mode -1)
 
-Set this value in your `early-init.el' file")
+;; Resizing the Emacs frame can be a terribly expensive part of changing the
+;; font. By inhibiting this, we easily halve startup times with fonts that are
+;; larger than the system default.
+(setq frame-inhibit-implied-resize t
+      frame-resize-pixelwise t)
 
-(defun my-package-archive-stale-p (archive)
-  "Return t if ARCHIVE is stale.
-
-ARCHIVE is stale if the on-disk cache is older than
-`crafted-package-update-days' old.  If
-`crafted-package-perform-stale-archive-check' is nil, the check
-is skipped"
-  (let* ((today (decode-time nil nil t))
-         (archive-name (expand-file-name
-                        (format "archives/%s/archive-contents" archive)
-                        package-user-dir))
-         (last-update-time (decode-time (file-attribute-modification-time
-                                         (file-attributes archive-name))))
-         (delta (make-decoded-time :day my-package-update-days)))
-    (when my-package-perform-stale-archive-check
-      (time-less-p (encode-time (decoded-time-add last-update-time delta))
-                   (encode-time today)))))
-
-(defun my-package-archives-stable-p ()
-  "Return t if any package archives' cache is out of date."
-  (interactive)
-  (cl-some #'my-package-archive-stale-p (mapcar #'car package-archives)))
-
-(when package-enable-at-startup
-  (package-initialize)
-  (require 'seq)
-  (cond ((seq-empty-p package-archive-contents)
-	 (progn
-	   (message "little-fox-config: package archives empty, initalizing")
-	   (package-refresh-contents)))
-	((my-package-archives-stable-p)
-	 (progn
-	   (message "little-fox-config: pacakge archives stable, refreshing")
-	   (package-refresh-contents t))))
-  (message "little-fox-package-config: package system initialized!"))
-
-;; Early Init ends here
+(provide 'early-init)
+;;; early-init.el ends here
