@@ -183,12 +183,13 @@
 
   (with-current-buffer (get-buffer-create "*scratch*")
     (insert (format ";;
-;; ███████╗███╗   ███╗ █████╗  ██████╗███████╗    ███████╗ ██████╗ ██╗      ██████╗
-;; ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝    ██╔════╝██╔═══██╗██║     ██╔═══██╗
-;; █████╗  ██╔████╔██║███████║██║     ███████╗    ███████╗██║   ██║██║     ██║   ██║
-;; ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║    ╚════██║██║   ██║██║     ██║   ██║
-;; ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║    ███████║╚██████╔╝███████╗╚██████╔╝
-;; ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚══════╝ ╚═════╝ ╚══════╝ ╚═════╝
+
+;; ██╗     ██╗████████╗████████╗██╗     ███████╗    ███████╗ ██████╗ ██╗  ██╗    ███████╗███╗   ███╗ █████╗  ██████╗███████╗
+;; ██║     ██║╚══██╔══╝╚══██╔══╝██║     ██╔════╝    ██╔════╝██╔═══██╗╚██╗██╔╝    ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝
+;; ██║     ██║   ██║      ██║   ██║     █████╗      █████╗  ██║   ██║ ╚███╔╝     █████╗  ██╔████╔██║███████║██║     ███████╗
+;; ██║     ██║   ██║      ██║   ██║     ██╔══╝      ██╔══╝  ██║   ██║ ██╔██╗     ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║
+;; ███████╗██║   ██║      ██║   ███████╗███████╗    ██║     ╚██████╔╝██╔╝ ██╗    ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║
+;; ╚══════╝╚═╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
 ;;
 ;;   Loading time : %s
 ;;   Packages     : %s
@@ -877,32 +878,14 @@ and restart Flymake to apply the changes."
   (display-time-default-load-average nil)
   (display-time-mail-string "")
   (zoneinfo-style-world-list                ; use `M-x worldclock RET' to see it
-   '(("America/Los_Angeles" "Los Angeles")
-     ("America/Vancouver" "Vancouver")
-     ("Canada/Pacific" "Canada/Pacific")
-     ("America/Chicago" "Chicago")
-     ("America/Toronto" "Toronto")
+   '(("Asia/Bangkok" "Viet Nam")
      ("America/New_York" "New York")
      ("Canada/Atlantic" "Canada/Atlantic")
-     ("Brazil/East" "Brasília")
-     ("America/Sao_Paulo" "São Paulo")
      ("UTC" "UTC")
      ("Europe/Lisbon" "Lisbon")
-     ("Europe/Brussels" "Brussels")
-     ("Europe/Athens" "Athens")
-     ("Asia/Riyadh" "Riyadh")
-     ("Asia/Tehran" "Tehran")
-     ("Asia/Tbilisi" "Tbilisi")
-     ("Asia/Yekaterinburg" "Yekaterinburg")
-     ("Asia/Kolkata" "Kolkata")
      ("Asia/Singapore" "Singapore")
-     ("Asia/Shanghai" "Shanghai")
-     ("Asia/Seoul" "Seoul")
      ("Asia/Tokyo" "Tokyo")
-     ("Asia/Vladivostok" "Vladivostok")
-     ("Australia/Brisbane" "Brisbane")
-     ("Australia/Sydney" "Sydney")
-     ("Pacific/Auckland" "Auckland"))))
+     ("Australia/Sydney" "Sydney"))))
 
 
 ;;; UNIQUIFY
@@ -939,9 +922,6 @@ and restart Flymake to apply the changes."
      ("Translate" . [simple-query "translate.google.com" "https://translate.google.com/?sl=auto&tl=vi&text=" "&op=translate"])
      ("YouTube" . [simple-query "www.youtube.com/feed/subscriptions" "www.youtube.com/rnesults?search_query=" ""])
      ("ChatGPT" . [simple-query "https://chatgpt.com" "https://chatgpt.com/?q=" ""]))))
-
- ;;; THEMES
-
 
 ;;; -------------------- NON TREESITTER AREA
 ;;; SASS-MODE
@@ -1140,7 +1120,7 @@ Also first tries the local node_modules/.bin and later the global bin."
   (defun emacs-solo/shorten-vc-mode (vc)
     "Shorten VC string to at most 20 characters.
  Replacing `Git-' with a branch symbol."
-    (let* ((vc (replace-regexp-in-string "^ Git[:-]" "  " vc))) ;; Options:   ᚠ ⎇
+    (let* ((vc (replace-regexp-in-string "^ Git[:-]" "  " vc))) ;; Options:   ᚠ ⎇
       (if (> (length vc) 20)
           (concat (substring vc 0 20) "…")
         vc)))
@@ -1805,6 +1785,7 @@ If SECOND is non-nil, separate the results with a newline."
   ;; trye `cape-dict'
   (text-mode-ispell-word-completion nil))
 
+
 ;; LOAD PACKAGES
 (require 'package)
 
@@ -1888,6 +1869,12 @@ is skipped"
 (use-package nerd-icons-ibuffer
   :ensure t
   :hook (ibuffer-mode . (lambda () (nerd-icons-ibuffer-mode t))))
+
+(use-package nerd-icons-completion
+  :ensure t
+  :after marginalia
+  :config
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 ;; BREADCRUMBS
 (use-package breadcrumb
@@ -2507,19 +2494,7 @@ installed"
 ;; Do not show warning
 (setq warning-minimum-level :error)
 
-;; Denote
-;; Second brain/zettlekasten by Protesilaos Stavrou,
-;; similar features as Org-Roam, but keeps everything in a
-;; single directory, does not use a database preferring filenaming
-;; conventions and grep instead.
-(use-package denote
-  :ensure t
-  :defer t
-  :config
-  (setq denote-directory (expand-file-name "~/Documents/denotes/")
-        ;; check
-        denote-infer-keywords t
-        denote-sort-keywords t))
+
 
 ;; THEMES
 (use-package ef-themes
@@ -2528,6 +2503,157 @@ installed"
   (ef-themes-select 'ef-autumn)
   (setq ef-themes-to-toggle '(ef-autumn ef-summer)
         ef-themes-to-rotate '(ef-dark ef-summer ef-autumn)))
+
+;; SOLONG
+;; Handle performnace for very long lines (so-long.el)
+(use-package so-long
+  :ensure nil
+  :hook (after-init . global-so-long-mode))
+
+;; DICTIONARY
+(use-package dictionary
+  :ensure nil
+  :bind ("C-c d" . dictionary-search)
+  :config
+  (setq dictionary-server "dict.org"
+        dictionary-default-popup-strategy "lev" ; read doc string
+        dictionary-create-buttons nil
+        dictionary-use-single-buffer t))
+
+;; DENOTE
+(use-package denote
+  :ensure t
+  :hook
+  ((text-mode . denote-fontify-links-mode-maybe)
+   (dired-mode . denote-dired-mode))
+  :bind
+  ( :map global-map
+    ("C-c n n" . denote)
+    ("C-c n N" . denote-type)
+    ("C-c n d" . denote-sort-dired)
+    ("C-c n r" . denote-rename-file)
+
+    :map text-mode-map
+    ("C-c n l" . denote-link)
+    ("C-c n L" . denote-add-links)
+    ("C-c n b" . denote-backlinks)
+    ("C-c n R" . denote-rename-file-using-front-matter)
+    ;; Keybindings specifically for Dired.
+    :map dired-mode-map
+    ("C-c C-d C-i" . denote-dired-link-marked-notes)
+    ("C-c C-d C-r" . denote-dired-rename-files)
+    ("C-c C-d C-k" . denote-dired-rename-marked-files-with-keywords)
+    ("C-c C-d C-f" . denote-dired-rename-marked-files-using-front-matter))
+  :config
+  (setq denote-directory (expand-file-name "~/Documents/denotes/"))
+  (setq denote-infer-keywords t)
+  (setq denote-sort-keywords t)
+  (setq denote-save-buffers nil)
+  (setq denote-prompts '(title keywords))
+  (setq denote-exclude-directories-regexp nil)
+  (setq denote-exclude-keywords-regexp nil)
+  (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
+  ;; Pick dates, where relevant, with Org's advanced interface:
+  (setq denote-date-prompt-use-org-read-date t)
+
+  ;; Automatically rename Denote buffers using the `denote-rename-buffer-format'.
+  (denote-rename-buffer-mode 1)
+
+  ;;;; Integrate Consult with Denote
+
+  (use-package consult-denote
+    :ensure t
+    :bind
+    (("C-c n f" . consult-denote-find)
+     ("C-c n g" . consult-denote-grep))
+    :config
+    (consult-denote-mode 1))
+
+  ;;;; Denote Org extras (denote-org)
+  (use-package denote-org
+    :ensure t
+    :commands
+    ( denote-org-link-to-heading
+      denote-org-backlings-for-heading
+
+      denote-org-extract-org-subtree
+
+      denote-org-convert-links-to-file-type
+      denote-org-convert-links-to-denote-type
+
+      denote-org-dblock-insert-files
+      denote-org-dblock-insert-links
+      denote-org-dblock-insert-backlinks
+      denote-org-dblock-insert-missing-links
+      denote-org-dblock-insert-files-as-headings))
+
+  ;;;; Denote Sequence notes for folgezettel (denote-sequence)
+  (use-package denote-sequence
+    :ensure t
+    :bind
+    ( :map global-map
+      ;; Here we make "C-c n s" a prefix for all "[n]otes with [s]equence".
+      ;; This is just for demonstration purposes: use the key bindings
+      ;; that work for you.  Also check the commands:
+      ;;
+      ;; - `denote-sequence-new-parent'
+      ;; - `denote-sequence-new-sibling'
+      ;; - `denote-sequence-new-child'
+      ;; - `denote-sequence-new-child-of-current'
+      ;; - `denote-sequence-new-sibling-of-current'
+      ("C-c n s s" . denote-sequence)
+      ("C-c n s f" . denote-sequence-find)
+      ("C-c n s l" . denote-sequence-link)
+      ("C-c n s d" . denote-sequence-dired)
+      ("C-c n s r" . denote-sequence-reparent)
+      ("C-c n s c" . denote-sequence-convert))
+    :config
+    ;; The default sequence scheme is `numeric'.
+    (setq denote-sequence-scheme 'alphanumeric))
+
+  ;;;; Denote Markdown extras (denote-markdown)
+  (use-package denote-markdown
+    :ensure t
+    :commands ( denote-markdown-convert-links-to-file-paths
+                denote-markdown-convert-links-to-denote-type
+                denote-markdown-convert-links-to-obsidian-type
+                denote-markdown-convert-obsidian-links-to-denote-type ))
+
+  ;;;; Denote Journal Extras (denote-journal)
+  (use-package denote-journal
+    :ensure t
+    :commands ( denote-journal-new-entry
+                denote-journal-new-or-existing-entry
+                denote-journal-link-or-create-entry )
+    :config
+    (setq denote-journal-directory (expand-file-name "journal" denote-directory))
+    (setq denote-journal-keyword "journal")
+    (setq denote-journal-title-format 'day-date-month-year))
+
+  ;;;; Denote Silo extras (denote-silo)
+  (use-package denote-silo
+    :ensure t
+    :commands ( denote-silo-create-node
+                denote-silo-open-or-create
+                denote-silo-select-silo-then-command
+                denote-silo-dired
+                denote-silo-cd )
+    :config
+    (setq denote-silo-directories
+          (list denote-directory
+                "~/Documents/books/"
+                "~/Documents/denote-test-silo/"))))
+
+;; Create note using Org Capture
+(with-eval-after-load 'org-capture
+  (add-to-list 'org-capture-templates
+               '("n" "New note (with Denote)" plain
+                 (file denote-last-path)
+                 #'denote-org-capture
+                 :no-save t
+                 :immediate-finish nil
+                 :kill-buffer t
+                 :jump-to-captured t)))
 
 
 (provide 'init)
