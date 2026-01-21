@@ -1,0 +1,60 @@
+# Compiled files
+*.elc
+*.eln
+
+# Package manager
+elpa/
+eln-cache/
+tree-sitter/
+
+# Auto-generated
+lf-config.el
+auto-saves/
+backups/
+cache/
+transient/
+url/
+request/
+
+# Local/private files
+private.el
+custom.el
+.DS_Store
+
+# GPG
+*.gpg
+
+# Various caches and temp files
+recentf
+places
+bookmarks
+projectile-bookmarks.eld
+projectile.cache
+history
+smex-items
+tramp
+srecode-map.el
+semanticdb/
+eshell/history
+eshell/lastdir
+network-security.data
+.lsp-session*
+.cache/
+*.log
+
+# Org mode
+.org-id-locations
+org-roam.db
+
+# Misc
+*~
+\#*\#
+.\#*
+.first-run
+.mc-lists.el
+abbrev_defs
+projects
+recentf.backup
+recentf.bak
+var/
+games/
