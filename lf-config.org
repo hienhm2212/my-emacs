@@ -1585,33 +1585,33 @@ Cape provides additional completion-at-point backends.
     
     ;; ============================================================
     ;; Web Development Languages
-    ;; Hybrid Approach: Biome (Fast) + Prettier (Comprehensive)
-    ;; Biome - Use for JS/TS/JSX/TSX/JSON (25x Faster)
+    ;; ESLint - Use for JS/TS/JSX/TSX (respects project .eslintrc)
     ;; ============================================================
-    ;; Using direct command (requires: npm install -g @biomejs/biome)
-    (setf (alist-get 'biome apheleia-formatters)
-          '("biome" "format"
-            "--indent-style=space"
-            "--indent-width=2"
-            "--stdin-file-path" filepath))
-    
-    ;; JavaScript/TypeScript with Biome
-    (setf (alist-get 'javascript-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'js-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'jsx-ts-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'js2-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'js3-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'typescript-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'typescriptreact-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'rjsx-mode apheleia-mode-alist) 'biome)
+    ;; Option 1: Use eslint_d (faster daemon, install: npm install -g eslint_d)
+    ;; (setf (alist-get 'eslint apheleia-formatters)
+    ;;       '("eslint_d" "--fix-to-stdout" "--stdin" "--stdin-filename" filepath))
 
-    ;; JSON/JSONC with Biome
-    (setf (alist-get 'json-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'biome)
-    (setf (alist-get 'jsonc-mode apheleia-mode-alist) 'biome)
+    ;; Option 2: Use npx eslint (uses project's eslint, no global install needed)
+    (setf (alist-get 'eslint apheleia-formatters)
+          '("npx" "eslint" "--fix-to-stdout" "--stdin" "--stdin-filename" filepath))
+
+    ;; JavaScript/TypeScript with ESLint
+    (setf (alist-get 'javascript-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'js-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'js-ts-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'jsx-ts-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'js2-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'js3-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'typescript-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'typescript-ts-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'tsx-ts-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'typescriptreact-mode apheleia-mode-alist) 'eslint)
+    (setf (alist-get 'rjsx-mode apheleia-mode-alist) 'eslint)
+
+    ;; JSON/JSONC with Prettier (ESLint doesn't format JSON well)
+    (setf (alist-get 'json-mode apheleia-mode-alist) 'prettier)
+    (setf (alist-get 'json-ts-mode apheleia-mode-alist) 'prettier)
+    (setf (alist-get 'jsonc-mode apheleia-mode-alist) 'prettier)
     
     ;; ----------------------------------------
     ;; Prettier - Use for everything else
@@ -2166,6 +2166,9 @@ Keybindings:
            (js-ts-mode . npm-mode)
            (jsx-ts-mode . npm-mode)))
 
+  ;; JavaScript/JSX base indent settings
+  (setq js-indent-level 2)
+
   ;; TypeScript/TSX configuration
   (use-package typescript-ts-mode
     :ensure nil
@@ -2178,6 +2181,10 @@ Keybindings:
     ((tsx-ts-mode . (lambda ()
                       (setq-local fill-column 100)
                       (setq-local comment-multi-line t)))))
+
+  ;; JSX/JS tree-sitter modes indent
+  (add-hook 'js-ts-mode-hook (lambda () (setq-local js-indent-level 2)))
+  (add-hook 'jsx-ts-mode-hook (lambda () (setq-local js-indent-level 2)))
 
   ;; Eglot configuration for TypeScript
   (with-eval-after-load 'eglot

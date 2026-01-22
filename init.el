@@ -14,6 +14,16 @@
     (if (file-exists-p config-org)
         (org-babel-load-file config-org)
       (error "No file `%s' found!! No configuration loaded!!" config-org))))
+
+;; Auto-tangle lf-config.org on save
+(defun lf/tangle-config-on-save ()
+  "Tangle lf-config.org to lf-config.el when saved."
+  (when (string-equal (buffer-file-name)
+                      (expand-file-name "lf-config.org" user-emacs-directory))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'after-save-hook #'lf/tangle-config-on-save)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
