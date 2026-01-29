@@ -685,7 +685,11 @@ With argument ARG, takes current line and moves it past ARG lines."
   (use-package doom-themes)
 
   (use-package doom-modeline
-    :config (doom-modeline-mode 1))
+    :custom
+    (doom-modeline-height 25)
+    (doom-modeline-bar-width 3)
+    :config
+    (doom-modeline-mode 1))
 
   (use-package diff-hl
     :config (global-diff-hl-mode 1))
@@ -863,10 +867,17 @@ From Sachachua
   (use-package indent-bars
     :ensure t
     :custom
-    (indent-bars-no-descend-lists t) ; no extra bars in continued func arg lists
     (indent-bars-treesit-support t)
+    (indent-bars-no-descend-string t)
     (indent-bars-treesit-ignore-blank-lines-types '("module"))
-    :hook ((prog-mode) . indent-bars-mode))
+    (indent-bars-width-frac 0.1)
+    (indent-bars-pad-frac 0.1)
+    (indent-bars-zigzag nil)
+    (indent-bars-color '(highlight :face-bg t :blend 0.2))
+    (indent-bars-pattern ".")
+    (indent-bars-color-by-depth '(:regexp "outline-\\([0-9]+\\)" :blend 1))
+    (indent-bars-highlight-current-depth '(:blend 0.5))
+    :hook ((prog-mode yaml-mode ruby-mode ruby-ts-mode) . indent-bars-mode))
 #+end_src
 ** nerd-icons
 Remember to execute ~M-x nerd-icons-install-fonts~ (just once, to install the fonts in your machine)
@@ -891,13 +902,14 @@ Remember to execute ~M-x nerd-icons-install-fonts~ (just once, to install the fo
   ;;;; === Fun: Nyan Cat progress bar ===
   (use-package nyan-mode
     :ensure t
-    :hook
-    ((prog-mode . nyan-mode)
-     (text-mode . nyan-mode))
-    :config
-    (setq nyan-bar-length 20)
-    (setq nyan-wavy-trail t)
-    (setq nyan-animate-nyancat t))
+    :custom
+    (nyan-bar-length 20)
+    (nyan-wavy-trail t)
+    (nyan-animate-nyancat t)
+    (nyan-minimum-window-width 64)
+    :init
+    ;; Enable globally for modeline
+    (nyan-mode 1))
 #+end_src
 
 ** dashboard
@@ -1885,7 +1897,8 @@ Company is disabled to avoid conflicts with Corfu.
                (json-mode . json-ts-mode)
                (js-json-mode . json-ts-mode)
                (sh-mode . bash-ts-mode)
-               (sh-base-mode . bash-ts-mode)))
+               (sh-base-mode . bash-ts-mode)
+               (ruby-mode . ruby-ts-mode)))
       (add-to-list 'major-mode-remap-alist mapping))
     (use-package combobulate
       :preface
@@ -1911,7 +1924,7 @@ Company is disabled to avoid conflicts with Corfu.
   (projectile-mode +1)
   (setq projectile-completion-system 'default)
   (setq projectile-enable-caching t)
-  (setq projectile-indexing-method 'alien)
+  (setq projectile-indexing-method 'hybrid)
   (add-to-list 'projectile-globally-ignored-files "node_modules")
   (add-to-list 'projectile-globally-ignored-files ".cache")
   (add-to-list 'projectile-globally-ignored-files "_cache")
@@ -2130,6 +2143,8 @@ Keybindings:
        ("python" . python-ts-mode)
        ("py" . python-ts-mode)
        ("go" . go-ts-mode)
+       ("ruby" . ruby-ts-mode)
+       ("rb" . ruby-ts-mode)
        ("rust" . rust-mode)
        ("css" . css-ts-mode)
        ("json" . json-ts-mode)
@@ -2148,6 +2163,98 @@ Keybindings:
 ** Rust
 #+begin_src emacs-lisp
   (use-package rust-mode)
+#+end_src
+** Ruby
+Required Ruby gems (you already have these installed):
+#+begin_example
+gem install solargraph rubocop
+# OR use ruby-lsp instead of solargraph:
+# gem install ruby-lsp
+#+end_example
+
+#+begin_src emacs-lisp
+  ;; Ruby base configuration
+  (use-package ruby-mode
+    :ensure nil
+    :mode "\\.rb\\'"
+    :mode "Rakefile\\'"
+    :mode "Gemfile\\'"
+    :interpreter "ruby"
+    :custom
+    (ruby-indent-level 2)
+    (ruby-indent-tabs-mode nil)
+    ;; Better indentation behavior
+    (ruby-deep-indent-paren nil)        ; Don't over-indent parameters
+    (ruby-deep-indent-paren-style nil)  ; Align to first parameter
+    (ruby-after-operator-indent t)      ; Indent after operators
+    (ruby-method-params-indent 0)       ; Method params indent offset
+    (ruby-block-indent t)               ; Indent block contents
+    :config
+    ;; Don't insert encoding comment
+    (setq ruby-insert-encoding-magic-comment nil)
+
+    ;; Tree-sitter indentation for ruby-ts-mode
+    (with-eval-after-load 'ruby-ts-mode
+      (setq ruby-ts-mode-indent-offset 2)))
+
+  ;; Interactive Ruby REPL
+  (use-package inf-ruby
+    :hook ((ruby-mode ruby-ts-mode) . inf-ruby-minor-mode)
+    :bind (:map ruby-mode-map
+                ("C-c C-s" . inf-ruby)
+                ("C-c C-r" . ruby-send-region)
+                ("C-c C-b" . ruby-send-buffer)))
+
+  ;; RSpec support
+  (use-package rspec-mode
+    :defer t
+    :hook ((ruby-mode ruby-ts-mode) . rspec-mode)
+    :custom
+    (rspec-use-relative-path t)
+    (compilation-scroll-output t))
+
+  ;; Eglot configuration for Ruby LSP
+  (with-eval-after-load 'eglot
+    ;; Solargraph configuration (default)
+    (add-to-list 'eglot-server-programs
+                 '((ruby-mode ruby-ts-mode) . ("solargraph" "stdio")))
+
+    ;; Alternative: Use ruby-lsp instead of solargraph
+    ;; Uncomment these lines and comment out the solargraph line above:
+    ;; (add-to-list 'eglot-server-programs
+    ;;              '((ruby-mode ruby-ts-mode) . ("ruby-lsp")))
+
+    ;; Solargraph workspace configuration
+    (setq-default eglot-workspace-configuration
+                  (append (default-value 'eglot-workspace-configuration)
+                          '(:solargraph
+                            (:diagnostics t
+                             :formatting t
+                             :useBundler :json-false
+                             :completion t
+                             :hover t
+                             :symbols t
+                             :definitions t
+                             :references t
+                             :rename t
+                             :folding t)))))
+
+  ;; Ruby mode hooks for better development experience
+  (add-hook 'ruby-mode-hook
+            (lambda ()
+              (setq-local tab-width 2)
+              (setq-local indent-tabs-mode nil)
+              (setq-local standard-indent 2)
+              (setq-local electric-indent-chars (append '(?., ?@, ?:) electric-indent-chars))
+              (subword-mode +1)))
+
+  (add-hook 'ruby-ts-mode-hook
+            (lambda ()
+              (setq-local tab-width 2)
+              (setq-local indent-tabs-mode nil)
+              (setq-local standard-indent 2)
+              (setq-local electric-indent-chars (append '(?., ?@, ?:) electric-indent-chars))
+              (subword-mode +1)))
 #+end_src
 ** Typescript / React
 #+begin_src emacs-lisp
